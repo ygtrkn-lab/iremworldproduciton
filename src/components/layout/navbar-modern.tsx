@@ -468,14 +468,20 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/property?type=sale');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(240,127,56,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-3xl p-8 text-left transition-all hover:scale-[1.02] active:scale-[0.98] h-48"
+                style={{
+                  backgroundImage: 'url(/uploads/properties/TR1190910397/iremworld-TR1190910397-1.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <svg className="relative z-10 h-12 w-12 text-white mb-4 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                 </svg>
-                <h3 className="text-white text-xl font-semibold mb-1">Satılık</h3>
-                <p className="text-white/70 text-sm">Portföy keşfet</p>
+                <h3 className="relative z-10 text-white text-xl font-semibold mb-1 drop-shadow-lg">Satılık</h3>
+                <p className="relative z-10 text-white/90 text-sm drop-shadow">Portföy keşfet</p>
               </button>
 
               <button
@@ -483,14 +489,20 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/property?type=rent');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-primary-400 to-primary-500 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(251,146,60,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-3xl p-8 text-left transition-all hover:scale-[1.02] active:scale-[0.98] h-48"
+                style={{
+                  backgroundImage: 'url(/uploads/properties/TR1215888471/iremworld-TR1215888471-1.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <svg className="relative z-10 h-12 w-12 text-white mb-4 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                 </svg>
-                <h3 className="text-white text-xl font-semibold mb-1">Kiralık</h3>
-                <p className="text-white/70 text-sm">Kira seçenekleri</p>
+                <h3 className="relative z-10 text-white text-xl font-semibold mb-1 drop-shadow-lg">Kiralık</h3>
+                <p className="relative z-10 text-white/90 text-sm drop-shadow">Kira seçenekleri</p>
               </button>
 
               <button
@@ -498,14 +510,20 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/projects');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-primary-600 to-primary-700 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(234,88,12,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-3xl p-8 text-left transition-all hover:scale-[1.02] active:scale-[0.98] h-48"
+                style={{
+                  backgroundImage: 'url(/uploads/properties/TR1233068203/iremworld-TR1233068203-1.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <svg className="relative z-10 h-12 w-12 text-white mb-4 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                <h3 className="text-white text-xl font-semibold mb-1">Projeler</h3>
-                <p className="text-white/70 text-sm">Yatırım fırsatları</p>
+                <h3 className="relative z-10 text-white text-xl font-semibold mb-1 drop-shadow-lg">Projeler</h3>
+                <p className="relative z-10 text-white/90 text-sm drop-shadow">Yatırım fırsatları</p>
               </button>
 
               <button
@@ -513,14 +531,20 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/government');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-slate-600 to-slate-700 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(71,85,105,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-3xl p-8 text-left transition-all hover:scale-[1.02] active:scale-[0.98] h-48"
+                style={{
+                  backgroundImage: 'url(/uploads/properties/TR1237800668/iremworld-TR1237800668-1.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <svg className="relative z-10 h-12 w-12 text-white mb-4 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="text-white text-xl font-semibold mb-1">Devlet</h3>
-                <p className="text-white/70 text-sm">Kamu portföyü</p>
+                <h3 className="relative z-10 text-white text-xl font-semibold mb-1 drop-shadow-lg">Devlet</h3>
+                <p className="relative z-10 text-white/90 text-sm drop-shadow">Kamu portföyü</p>
               </button>
 
               <button
@@ -528,14 +552,20 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/consultants');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-primary-400 to-amber-500 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(251,146,60,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-3xl p-8 text-left transition-all hover:scale-[1.02] active:scale-[0.98] h-48"
+                style={{
+                  backgroundImage: 'url(/uploads/properties/TR1239293124/iremworld-TR1239293124-1.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <svg className="relative z-10 h-12 w-12 text-white mb-4 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <h3 className="text-white text-xl font-semibold mb-1">Danışmanlar</h3>
-                <p className="text-white/70 text-sm">Uzman network</p>
+                <h3 className="relative z-10 text-white text-xl font-semibold mb-1 drop-shadow-lg">Danışmanlar</h3>
+                <p className="relative z-10 text-white/90 text-sm drop-shadow">Uzman network</p>
               </button>
 
               <button
@@ -543,14 +573,20 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/store');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(245,158,11,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden rounded-3xl p-8 text-left transition-all hover:scale-[1.02] active:scale-[0.98] h-48"
+                style={{
+                  backgroundImage: 'url(/uploads/properties/TR1239319774/iremworld-TR1239319774-1.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center'
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-all" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <svg className="relative z-10 h-12 w-12 text-white mb-4 drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                 </svg>
-                <h3 className="text-white text-xl font-semibold mb-1">Mağazalar</h3>
-                <p className="text-white/70 text-sm">Premium ofisler</p>
+                <h3 className="relative z-10 text-white text-xl font-semibold mb-1 drop-shadow-lg">Mağazalar</h3>
+                <p className="relative z-10 text-white/90 text-sm drop-shadow">Premium ofisler</p>
               </button>
             </div>
 
