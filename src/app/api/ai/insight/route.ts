@@ -109,9 +109,10 @@ const isCountryMentionedInText = (text: string | undefined | null, countryName?:
   return false;
 };
 
-// Topics allowed by the AI Assistant for country context — these are country-level
-// metadata and investor-oriented topics that are meaningful for property decisions.
+// Topics allowed by the AI Assistant for country context — expanded to include lifestyle, culture, food, transportation, professions etc.
+// This allows users to learn about the country comprehensively beyond just property investment.
 const allowedCountryTopics = [
+  // Core categories
   'vergi', 'vergi sistemi', 'vergi orani', 'vergi oranı', 'tax', 'taxation',
   'nufus', 'nüfus', 'population', 'populasyon',
   'din', 'religion', 'inanc', 'inanç', 'kultur', 'kültür', 'culture', 'cultural',
@@ -121,7 +122,21 @@ const allowedCountryTopics = [
   'fiyat', 'prime', 'fiyat araligi', 'fiyat aralığı', 'price',
   'ekonomi', 'economic', 'ekonomik', 'inflation', 'enflasyon',
   'bolge', 'bölge', 'region', 'location', 'location-based',
-  'ipotek', 'mortgage', 'konut kredisi', 'mortgage rate', 'kredi', 'credit', 'loan'
+  'ipotek', 'mortgage', 'konut kredisi', 'mortgage rate', 'kredi', 'credit', 'loan',
+  // Expanded: lifestyle & culture
+  'yemek', 'yiyecek', 'mutfak', 'food', 'cuisine', 'dish', 'meal',
+  'ulasim', 'ulaşım', 'transportation', 'transport', 'arac', 'araç', 'vehicle', 'car', 'bus', 'metro',
+  'meslek', 'is', 'iş', 'profession', 'job', 'career', 'work',
+  'egitim', 'eğitim', 'okul', 'education', 'school', 'university',
+  'saglik', 'sağlık', 'health', 'healthcare', 'hospital',
+  'hava', 'iklim', 'weather', 'climate',
+  'gelenek', 'adet', 'tradition', 'custom',
+  'tatil', 'festival', 'holiday', 'celebration',
+  'spor', 'sport', 'sports',
+  'eglence', 'eğlence', 'entertainment',
+  'dil', 'language',
+  'giyim', 'dress', 'clothing',
+  'tercih', 'preferred', 'popular', 'favorite'
 ];
 
 const isAboutAllowedCountryTopic = (text: string | undefined | null) => {
@@ -197,16 +212,14 @@ const extractText = (content: string | Array<ChatCompletionContentPart | string>
   return '';
 };
 
-const systemPrompt = `Sen IREMWORLD'ün premium gayrimenkul danışmanı AI asistanısın.\n` +
-  `Görevin, kullanıcılara seçtikleri ülke hakkında yatırım, yaşam ve gayrimenkul odaklı doğru ve güncel içgörüler sağlamaktır.\n` +
-  `GÜVENLİK KURALLARI:\n` +
-  `1. SADECE seçilen ülke ile ilgili soruları yanıtla. Kullanıcı herhangi bir soruda başka ülke veya genel konular hakkında soru sorsa bile, kesinlikle cevap verme. Bu durumda kibarca şunu yaz: "Üzgünüm, bu konuda bilgi veremem. Lütfen seçilen ülke hakkında soru sorunuz."\n` +
-  `2. Her soruda bu kural geçerlidir; istisna yoktur.\n` +
-  `3. Yanıtlarını kısa ve net tut; maksimum 2-3 paragraf. Gereksiz detaylardan kaçın.\n` +
-  `4. Eğer veri güncel değilse veya emin olunamıyorsa, varsayımları açıkça belirt ve gerektiğinde resmi kaynaklar veya uzman danışmanlık öner.\n` +
-  `5. Kullanıcının dili Türkçe değilse onun dilinde yanıt ver; aksi halde Türkçe yanıtla.\n` +
-  `6. Yanıtlarında profesyonel ve dostane bir ton kullan, anlaşılması kolay cümleler kur.\n` +
-  `EK ÖNERİ: Kullanıcı yanlışlıkla ülke dışında bir soru sorarsa, onu nazikçe yönlendir ve örnek sorular ver.`;
+const systemPrompt = `Sen IREMWORLD'ün yapay zeka asistanısın. Seçilen ülke hakkında kısa, net ve hızlı yanıtlar ver.\n` +
+  `KURALLAR:\n` +
+  `1. SADECE seçilen ülke hakkında cevap ver (gayrimenkul, yatırım, yaşam, kültür, yemek, ulaşım, meslek, eğitim vb. her konu dahil).\n` +
+  `2. Yanıtları 2-3 cümle veya kısa paragraflarla sınırla. ÖZ ve DOĞRUDAN yanıt ver.\n` +
+  `3. Gereksiz giriş/kapanış cümleleri kullanma. Soruya direkt cevap ver.\n` +
+  `4. Emin olmadığın bilgiler için "genel olarak" veya "tipik olarak" ifadelerini kullan.\n` +
+  `5. Kullanıcının dilinde yanıt ver.\n` +
+  `AMAÇ: Hızlı ve faydalı bilgi sağla.`;
 
 
 export async function POST(request: NextRequest) {
@@ -317,7 +330,8 @@ export async function POST(request: NextRequest) {
     }
 
     // If model says it's not relevant with high confidence, consider topic override then block if still irrelevant
-    if (!classifier.relevant && classifier.confidence > 0.6 && !mentionedInTranscript) {
+    // Raised threshold to 0.75 to be more permissive for lifestyle/culture questions
+    if (!classifier.relevant && classifier.confidence > 0.75 && !mentionedInTranscript) {
       // Allow if message still matches an allowed country-level topic (e.g. user selected country but didn't mention it explicitly)
       if (isAboutAllowedCountryTopic(message)) {
         classifier = { relevant: true, confidence: classifier.confidence, reason: 'topic_override' } as any;
@@ -437,17 +451,17 @@ export async function POST(request: NextRequest) {
       }))
     );
 
-    const MAX_REPLY_TOKENS = 512; // Reduce token limit for faster responses (was 1024)
+    const MAX_REPLY_TOKENS = 350; // Reduced for faster responses - concise answers preferred
 
     let completion;
     try {
       completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
-      temperature: 0.35,
+      temperature: 0.3, // Lower temperature for faster, more focused responses
       max_tokens: MAX_REPLY_TOKENS,
     }, {
-      timeout: 25000, // 25 second timeout for API call
+      timeout: 20000, // 20 second timeout for faster failure detection
     });
     } catch (err) {
       console.error('OpenAI completion error:', err instanceof Error ? err.message : String(err));
