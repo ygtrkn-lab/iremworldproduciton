@@ -430,11 +430,9 @@ export default function ModernNavbar() {
       <>
         {/* Backdrop Overlay */}
         <div 
-          className="fixed inset-0 z-40 bg-gradient-to-b from-white/95 via-white/90 to-white/80 backdrop-blur-xl animate-in fade-in duration-300"
-          onClick={() => setIsSearchOpen(false)}
-        />
-        
-        {/* Search Content */}
+          className="fixed inset-0 z-40 bg-gradient-to-b from-orange-50/98 via-amber-50/95 to-white/90 backdrop-blur-xl animate-in fade-in duration-300"
+            onClick={() => setIsSearchOpen(false)}
+          />        {/* Search Content */}
         <div className="fixed inset-x-0 top-0 z-50 pt-32">
           <div 
             className="w-full max-w-5xl mx-auto px-4 animate-in slide-in-from-top-4 duration-300"
@@ -470,7 +468,7 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/property?type=sale');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(59,130,246,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(240,127,56,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -485,7 +483,7 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/property?type=rent');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(168,85,247,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(245,158,11,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -500,7 +498,7 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/projects');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-orange-500 to-orange-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(249,115,22,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden bg-gradient-to-br from-orange-600 to-red-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(234,88,12,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -515,7 +513,7 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/government');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(16,185,129,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden bg-gradient-to-br from-teal-500 to-teal-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(20,184,166,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -530,7 +528,7 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/consultants');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-pink-500 to-pink-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(236,72,153,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden bg-gradient-to-br from-rose-500 to-rose-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(244,63,94,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -545,7 +543,7 @@ export default function ModernNavbar() {
                   setIsSearchOpen(false);
                   router.push('/store');
                 }}
-                className="group relative overflow-hidden bg-gradient-to-br from-amber-500 to-amber-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(245,158,11,0.3)] active:scale-[0.98]"
+                className="group relative overflow-hidden bg-gradient-to-br from-yellow-500 to-amber-500 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgba(234,179,8,0.4)] active:scale-[0.98]"
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                 <svg className="h-12 w-12 text-white/90 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -557,8 +555,8 @@ export default function ModernNavbar() {
             </div>
 
             {/* Popular Searches */}
-            <div className="bg-white/60 backdrop-blur-xl rounded-3xl p-6 border border-slate-200/60 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
-              <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Popüler Aramalar</h3>
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-6 border border-primary-200/40 shadow-[0_8px_30px_rgba(240,127,56,0.08)]">
+              <h3 className="text-sm font-semibold text-primary-700 uppercase tracking-wider mb-4">Popüler Aramalar</h3>
               <div className="flex flex-wrap gap-2">
                 {['İstanbul Villa', 'Denize Sıfır', 'Lüks Daire', 'Yatırımlık Arsa', 'Ofis', 'Dükkan'].map((term) => (
                   <button
@@ -567,7 +565,7 @@ export default function ModernNavbar() {
                       setIsSearchOpen(false);
                       router.push(`/property?search=${encodeURIComponent(term)}`);
                     }}
-                    className="px-5 py-2.5 bg-white/80 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-full text-sm font-medium transition-all hover:shadow-sm"
+                    className="px-5 py-2.5 bg-white/90 hover:bg-primary-50 border border-primary-200/60 hover:border-primary-400 text-primary-700 hover:text-primary-900 rounded-full text-sm font-medium transition-all hover:shadow-sm"
                   >
                     {term}
                   </button>
