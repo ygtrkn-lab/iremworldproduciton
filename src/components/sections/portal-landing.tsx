@@ -3021,7 +3021,14 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                           <div className="text-[9px] xs:text-[10px] font-semibold uppercase tracking-wider opacity-80 mb-0.5 xs:mb-1">
                             {message.role === 'user' ? 'Siz' : 'AI Asistan'}
                           </div>
-                          <p className="text-xs xs:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                          {message.properties && message.properties.length > 0 ? (
+                            // If structured properties exist, avoid showing the long textual list
+                            <div>
+                              <div className="text-sm xs:text-base font-semibold mb-1">Toplam {message.properties.length} ilan bulundu:</div>
+                            </div>
+                          ) : (
+                            <p className="text-xs xs:text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                          )}
                           {message.properties && message.properties.length > 0 && (
                             <div className="mt-2 space-y-2">
                               {message.properties.map(p => (
