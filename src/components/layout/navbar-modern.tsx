@@ -67,7 +67,18 @@ export default function ModernNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const dropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      setIsSearchOpen(false);
+      router.push(`/for-sale?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -102,6 +113,27 @@ export default function ModernNavbar() {
       document.body.style.overflow = 'unset';
     };
   }, [isMobileMenuOpen]);
+
+  // Close search modal with ESC key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+      }
+    };
+
+    if (isSearchOpen) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [isSearchOpen]);
 
   const handleMouseEnter = (menuName: string) => {
     if (dropdownTimeoutRef.current) {
@@ -231,7 +263,7 @@ export default function ModernNavbar() {
             {/* Right Actions */}
             <div className="ml-auto flex items-center gap-2">
               <button
-                onClick={() => router.push('/for-sale')}
+                onClick={() => setIsSearchOpen(true)}
                 className="hidden lg:flex items-center gap-2 rounded-full border border-slate-200/60 bg-white/80 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
               >
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -353,11 +385,11 @@ export default function ModernNavbar() {
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  router.push('/for-sale');
+                  setIsSearchOpen(true);
                 }}
                 className="flex w-full items-center justify-between rounded-3xl border border-slate-900/10 bg-slate-900/5 px-4 py-4 text-sm font-semibold text-slate-700"
               >
-                İlan Ara
+                Kapsamlı Arama
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -386,6 +418,165 @@ export default function ModernNavbar() {
                   </svg>
                 </Link>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Search Modal - Kapsamlı Arama Motoru */}
+      {isSearchOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-start justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={() => setIsSearchOpen(false)}
+        >
+          <div 
+            className="w-full max-w-4xl mx-4 mt-20 animate-in slide-in-from-top-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/40 overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-slate-200/60">
+                <h2 className="text-2xl font-bold text-slate-900">Kapsamlı Arama</h2>
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                  aria-label="Aramayı kapat"
+                >
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Search Content */}
+              <div className="p-6">
+                <form onSubmit={handleSearch} className="mb-6">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Ne aramak istersiniz?"
+                      className="w-full px-6 py-4 pr-12 text-lg bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition"
+                      autoFocus
+                    />
+                    <button
+                      type="submit"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 flex items-center justify-center rounded-xl bg-primary-600 text-white hover:bg-primary-700 transition"
+                    >
+                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </button>
+                  </div>
+                </form>
+
+                {/* Quick Links */}
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      router.push('/for-sale?type=sale');
+                    }}
+                    className="flex flex-col items-start p-4 bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl border border-blue-200/40 hover:border-blue-300 transition group"
+                  >
+                    <svg className="h-8 w-8 text-blue-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                    <span className="font-semibold text-slate-900">Satılık İlanlar</span>
+                    <span className="text-xs text-slate-600 mt-1">Gayrimenkul portföyü</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      router.push('/for-sale?type=rent');
+                    }}
+                    className="flex flex-col items-start p-4 bg-gradient-to-br from-purple-50 to-purple-100/50 rounded-2xl border border-purple-200/40 hover:border-purple-300 transition group"
+                  >
+                    <svg className="h-8 w-8 text-purple-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                    <span className="font-semibold text-slate-900">Kiralık İlanlar</span>
+                    <span className="text-xs text-slate-600 mt-1">Kira portföyü</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      router.push('/projects');
+                    }}
+                    className="flex flex-col items-start p-4 bg-gradient-to-br from-orange-50 to-orange-100/50 rounded-2xl border border-orange-200/40 hover:border-orange-300 transition group"
+                  >
+                    <svg className="h-8 w-8 text-orange-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    <span className="font-semibold text-slate-900">Projeler</span>
+                    <span className="text-xs text-slate-600 mt-1">Yatırım projeleri</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      router.push('/government');
+                    }}
+                    className="flex flex-col items-start p-4 bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl border border-green-200/40 hover:border-green-300 transition group"
+                  >
+                    <svg className="h-8 w-8 text-green-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="font-semibold text-slate-900">Devlet</span>
+                    <span className="text-xs text-slate-600 mt-1">Kamu gayrimenkulleri</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      router.push('/consultants');
+                    }}
+                    className="flex flex-col items-start p-4 bg-gradient-to-br from-pink-50 to-pink-100/50 rounded-2xl border border-pink-200/40 hover:border-pink-300 transition group"
+                  >
+                    <svg className="h-8 w-8 text-pink-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <span className="font-semibold text-slate-900">Danışmanlar</span>
+                    <span className="text-xs text-slate-600 mt-1">Uzman network</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      router.push('/store');
+                    }}
+                    className="flex flex-col items-start p-4 bg-gradient-to-br from-amber-50 to-amber-100/50 rounded-2xl border border-amber-200/40 hover:border-amber-300 transition group"
+                  >
+                    <svg className="h-8 w-8 text-amber-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span className="font-semibold text-slate-900">Mağazalar</span>
+                    <span className="text-xs text-slate-600 mt-1">Premium ofisler</span>
+                  </button>
+                </div>
+
+                {/* Popular Searches */}
+                <div className="mt-6 pt-6 border-t border-slate-200">
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3">Popüler Aramalar</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {['İstanbul Villa', 'Denize Sıfır', 'Lüks Daire', 'Yatırımlık Arsa', 'Ofis', 'Dükkan'].map((term) => (
+                      <button
+                        key={term}
+                        onClick={() => {
+                          setIsSearchOpen(false);
+                          router.push(`/for-sale?search=${encodeURIComponent(term)}`);
+                        }}
+                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-sm font-medium transition"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
