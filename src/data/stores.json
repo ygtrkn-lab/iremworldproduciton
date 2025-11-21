@@ -103,8 +103,8 @@
       "city": "İstanbul",
       "country": "TR"
     },
-    "logo": "/images/icons/png/luxury-homes-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (1).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/videos/portal-bg/iremworld-background (6).jpg",
     "brandColor": "#d97706",
     "stats": {
       "activeListings": 78,
@@ -180,8 +180,8 @@
       "city": "Ankara",
       "country": "TR"
     },
-    "logo": "/images/icons/png/ankara-modern-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (2).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/videos/portal-bg/iremworld-background (7).jpg",
     "brandColor": "#059669",
     "stats": {
       "activeListings": 112,
@@ -245,8 +245,8 @@
       "city": "Dubai",
       "country": "AE"
     },
-    "logo": "/images/icons/png/dubai-property-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (3).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/videos/portal-bg/iremworld-background (8).jpg",
     "brandColor": "#dc2626",
     "stats": {
       "activeListings": 230,
@@ -309,8 +309,8 @@
       "city": "İzmir",
       "country": "TR"
     },
-    "logo": "/images/icons/png/izmir-sahil-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (4).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/videos/portal-bg/iremworld-background (9).jpg",
     "brandColor": "#0891b2",
     "stats": {
       "activeListings": 95,
@@ -374,8 +374,8 @@
       "city": "Antalya",
       "country": "TR"
     },
-    "logo": "/images/icons/png/antalya-investment-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (5).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/videos/portal-bg/wsdfwegfr.jpg",
     "brandColor": "#ea580c",
     "stats": {
       "activeListings": 145,
@@ -439,8 +439,8 @@
       "city": "London",
       "country": "GB"
     },
-    "logo": "/images/icons/png/london-prime-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (1).png",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/images/partners/appraisal-hero.jpg",
     "brandColor": "#1d4ed8",
     "stats": {
       "activeListings": 165,
@@ -503,8 +503,8 @@
       "city": "New York",
       "country": "US"
     },
-    "logo": "/images/icons/png/ny-skyline-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (2).png",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/images/partners/engineering-hero.jpg",
     "brandColor": "#dc2626",
     "stats": {
       "activeListings": 320,
@@ -567,8 +567,8 @@
       "city": "Berlin",
       "country": "DE"
     },
-    "logo": "/images/icons/png/berlin-urban-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (1).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/images/partners/interior-design-hero.jpg",
     "brandColor": "#0f766e",
     "stats": {
       "activeListings": 142,
@@ -627,8 +627,8 @@
       "city": "Paris",
       "country": "FR"
     },
-    "logo": "/images/icons/png/paris-heritage-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (2).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (1).jpg",
     "brandColor": "#a16207",
     "stats": {
       "activeListings": 88,
@@ -687,8 +687,8 @@
       "city": "Singapore",
       "country": "SG"
     },
-    "logo": "/images/icons/png/sg-harbour-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (3).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (2).jpg",
     "brandColor": "#2563eb",
     "stats": {
       "activeListings": 205,
@@ -747,8 +747,8 @@
       "city": "Sydney",
       "country": "AU"
     },
-    "logo": "/images/icons/png/sydney-coastal-logo.png",
-    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (4).jpg",
+    "logo": "/pdflogo/logo.png",
+    "coverImage": "/uploads/banner-gallery-bg/banner-gallery (5).jpg",
     "brandColor": "#0ea5e9",
     "stats": {
       "activeListings": 132,
