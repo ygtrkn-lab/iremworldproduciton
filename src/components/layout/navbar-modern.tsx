@@ -425,14 +425,19 @@ export default function ModernNavbar() {
 
       {/* Search Modal - Modern Minimalist Design */}
       {isSearchOpen && (
-        <div 
-          className="fixed inset-0 z-50 flex items-start justify-center bg-white/80 backdrop-blur-xl animate-in fade-in duration-300"
-          onClick={() => setIsSearchOpen(false)}
-        >
+        <>
+          {/* Backdrop Overlay */}
           <div 
-            className="w-full max-w-5xl mx-4 mt-24 animate-in slide-in-from-top-4 duration-300"
-            onClick={(e) => e.stopPropagation()}
-          >
+            className="fixed inset-0 z-40 bg-gradient-to-b from-white/95 via-white/90 to-white/80 backdrop-blur-xl animate-in fade-in duration-300"
+            onClick={() => setIsSearchOpen(false)}
+          />
+          
+          {/* Search Content */}
+          <div className="fixed inset-x-0 top-0 z-50 pt-32">
+            <div 
+              className="w-full max-w-5xl mx-auto px-4 animate-in slide-in-from-top-4 duration-300"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Search Input */}
             <form onSubmit={handleSearch} className="mb-8">
               <div className="relative group">
@@ -568,7 +573,7 @@ export default function ModernNavbar() {
               </div>
             </div>
           </div>
-        </div>
+        </>
       )}
     </header>
   );
