@@ -375,6 +375,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/antalya-investment-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-5.mp4",
     "brandColor": "#ea580c",
     "stats": {
       "activeListings": 145,
@@ -384,6 +385,34 @@
     },
     "specialties": ["Turizm Yatırımı", "Otel", "Apart", "Villa", "Arsa"],
     "serviceAreas": ["Lara", "Belek", "Kemer", "Alanya", "Side"],
+    "employees": [
+      {
+        "id": "emp-006-1",
+        "name": "Burak Yılmaz",
+        "position": "Yatırım Direktörü",
+        "photo": "https://randomuser.me/api/portraits/men/52.jpg",
+        "email": "burak@antalyainvestment.com",
+        "phone": "+90 532 888 9900",
+        "languages": ["Türkçe", "İngilizce", "Rusça", "Almanca"],
+        "linkedin": "https://linkedin.com/in/burak-yilmaz-antalya",
+        "specialties": ["Turizm Yatırımı", "Otel"],
+        "yearsOfExperience": 10,
+        "bio": "Antalya'da 10 yıldır turizm amaçlı gayrimenkul yatırımlarında uzman."
+      },
+      {
+        "id": "emp-006-2",
+        "name": "Natalia Ivanova",
+        "position": "Yabancı Yatırımcı Danışmanı",
+        "photo": "https://randomuser.me/api/portraits/women/48.jpg",
+        "email": "natalia@antalyainvestment.com",
+        "phone": "+90 532 999 0011",
+        "languages": ["Русский", "English", "Türkçe"],
+        "linkedin": "https://linkedin.com/in/natalia-ivanova-antalya",
+        "specialties": ["Villa", "Apart"],
+        "yearsOfExperience": 6,
+        "bio": "Rus yatırımcılara özel hizmet sunan deneyimli danışman."
+      }
+    ],
     "featured": true,
     "verified": true,
     "rating": 4.7,
@@ -411,6 +440,7 @@
       "country": "GB"
     },
     "logo": "/images/icons/png/london-prime-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-6.mp4",
     "brandColor": "#1d4ed8",
     "stats": {
       "activeListings": 165,
@@ -420,6 +450,34 @@
     },
     "specialties": ["Luxury Residential", "Investment", "Office"],
     "serviceAreas": ["Mayfair", "Chelsea", "Canary Wharf", "City of London"],
+    "employees": [
+      {
+        "id": "emp-007-1",
+        "name": "James Wellington",
+        "position": "Managing Director",
+        "photo": "https://randomuser.me/api/portraits/men/22.jpg",
+        "email": "james@londonprime.uk",
+        "phone": "+44 7700 900123",
+        "languages": ["English", "French"],
+        "linkedin": "https://linkedin.com/in/james-wellington-london",
+        "specialties": ["Luxury Residential", "Investment"],
+        "yearsOfExperience": 14,
+        "bio": "London prime property expert with extensive Mayfair portfolio."
+      },
+      {
+        "id": "emp-007-2",
+        "name": "Sophie Bennett",
+        "position": "Senior Consultant",
+        "photo": "https://randomuser.me/api/portraits/women/58.jpg",
+        "email": "sophie@londonprime.uk",
+        "phone": "+44 7700 900234",
+        "languages": ["English", "Spanish"],
+        "linkedin": "https://linkedin.com/in/sophie-bennett-london",
+        "specialties": ["Office", "Commercial"],
+        "yearsOfExperience": 8,
+        "bio": "Specializing in City of London commercial properties."
+      }
+    ],
     "featured": true,
     "verified": true,
     "rating": 4.7,
@@ -446,6 +504,7 @@
       "country": "US"
     },
     "logo": "/images/icons/png/ny-skyline-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-7.mp4",
     "brandColor": "#dc2626",
     "stats": {
       "activeListings": 320,
@@ -455,6 +514,34 @@
     },
     "specialties": ["High-Rise", "Commercial", "Mixed-Use"],
     "serviceAreas": ["Manhattan", "Brooklyn", "Long Island City"],
+    "employees": [
+      {
+        "id": "emp-008-1",
+        "name": "Michael Rodriguez",
+        "position": "CEO",
+        "photo": "https://randomuser.me/api/portraits/men/33.jpg",
+        "email": "michael@skylinerealty.us",
+        "phone": "+1 (212) 555-0101",
+        "languages": ["English", "Spanish"],
+        "linkedin": "https://linkedin.com/in/michael-rodriguez-nyc",
+        "specialties": ["High-Rise", "Commercial"],
+        "yearsOfExperience": 18,
+        "bio": "NYC real estate veteran with focus on Manhattan high-rises."
+      },
+      {
+        "id": "emp-008-2",
+        "name": "Emily Chen",
+        "position": "Investment Director",
+        "photo": "https://randomuser.me/api/portraits/women/42.jpg",
+        "email": "emily@skylinerealty.us",
+        "phone": "+1 (212) 555-0202",
+        "languages": ["English", "Mandarin"],
+        "linkedin": "https://linkedin.com/in/emily-chen-nyc",
+        "specialties": ["Mixed-Use", "Investment"],
+        "yearsOfExperience": 12,
+        "bio": "Specializing in mixed-use developments and Asian investors."
+      }
+    ],
     "featured": true,
     "verified": true,
     "rating": 4.9,
@@ -481,6 +568,7 @@
       "country": "DE"
     },
     "logo": "/images/icons/png/berlin-urban-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-8.mp4",
     "brandColor": "#0f766e",
     "stats": {
       "activeListings": 142,
@@ -490,6 +578,34 @@
     },
     "specialties": ["Loft", "Office", "Logistics"],
     "serviceAreas": ["Mitte", "Prenzlauer Berg", "Kreuzberg", "Friedrichshain"],
+    "employees": [
+      {
+        "id": "emp-009-1",
+        "name": "Klaus Müller",
+        "position": "Geschäftsführer",
+        "photo": "https://randomuser.me/api/portraits/men/64.jpg",
+        "email": "klaus@urban-spaces.de",
+        "phone": "+49 170 1234567",
+        "languages": ["Deutsch", "English"],
+        "linkedin": "https://linkedin.com/in/klaus-muller-berlin",
+        "specialties": ["Loft", "Office"],
+        "yearsOfExperience": 11,
+        "bio": "Berlin startup campus and modern office space expert."
+      },
+      {
+        "id": "emp-009-2",
+        "name": "Anna Schmidt",
+        "position": "Projektleiterin",
+        "photo": "https://randomuser.me/api/portraits/women/72.jpg",
+        "email": "anna@urban-spaces.de",
+        "phone": "+49 170 2345678",
+        "languages": ["Deutsch", "English", "Polish"],
+        "linkedin": "https://linkedin.com/in/anna-schmidt-berlin",
+        "specialties": ["Logistics", "Urban Development"],
+        "yearsOfExperience": 7,
+        "bio": "Logistics and warehouse development specialist."
+      }
+    ],
     "featured": false,
     "verified": true,
     "rating": 4.5,
@@ -512,6 +628,7 @@
       "country": "FR"
     },
     "logo": "/images/icons/png/paris-heritage-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-9.mp4",
     "brandColor": "#a16207",
     "stats": {
       "activeListings": 88,
@@ -521,6 +638,34 @@
     },
     "specialties": ["Historic", "Luxury", "Pied-à-terre"],
     "serviceAreas": ["8ème", "7ème", "Le Marais", "Saint-Germain"],
+    "employees": [
+      {
+        "id": "emp-010-1",
+        "name": "Pierre Dubois",
+        "position": "Directeur Général",
+        "photo": "https://randomuser.me/api/portraits/men/56.jpg",
+        "email": "pierre@parisheritage.fr",
+        "phone": "+33 6 12 34 56 78",
+        "languages": ["Français", "English"],
+        "linkedin": "https://linkedin.com/in/pierre-dubois-paris",
+        "specialties": ["Historic", "Luxury"],
+        "yearsOfExperience": 16,
+        "bio": "Parisian heritage property specialist with extensive Haussmannian expertise."
+      },
+      {
+        "id": "emp-010-2",
+        "name": "Isabelle Laurent",
+        "position": "Conseillère Senior",
+        "photo": "https://randomuser.me/api/portraits/women/62.jpg",
+        "email": "isabelle@parisheritage.fr",
+        "phone": "+33 6 23 45 67 89",
+        "languages": ["Français", "English", "Italian"],
+        "linkedin": "https://linkedin.com/in/isabelle-laurent-paris",
+        "specialties": ["Pied-à-terre", "Luxury"],
+        "yearsOfExperience": 9,
+        "bio": "Luxury pied-à-terre specialist for international clients."
+      }
+    ],
     "featured": false,
     "verified": true,
     "rating": 4.6,
@@ -543,6 +688,7 @@
       "country": "SG"
     },
     "logo": "/images/icons/png/sg-harbour-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-10.mp4",
     "brandColor": "#2563eb",
     "stats": {
       "activeListings": 205,
@@ -552,6 +698,34 @@
     },
     "specialties": ["Marina Condo", "Commercial", "Data Center"],
     "serviceAreas": ["Marina Bay", "Sentosa", "Orchard", "River Valley"],
+    "employees": [
+      {
+        "id": "emp-011-1",
+        "name": "David Tan",
+        "position": "CEO",
+        "photo": "https://randomuser.me/api/portraits/men/18.jpg",
+        "email": "david@harbourrealty.sg",
+        "phone": "+65 9123 4567",
+        "languages": ["English", "Mandarin", "Malay"],
+        "linkedin": "https://linkedin.com/in/david-tan-singapore",
+        "specialties": ["Marina Condo", "Commercial"],
+        "yearsOfExperience": 9,
+        "bio": "Singapore marina and commercial property investment expert."
+      },
+      {
+        "id": "emp-011-2",
+        "name": "Mei Ling Wong",
+        "position": "Investment Director",
+        "photo": "https://randomuser.me/api/portraits/women/24.jpg",
+        "email": "meiling@harbourrealty.sg",
+        "phone": "+65 9234 5678",
+        "languages": ["English", "Mandarin", "Cantonese"],
+        "linkedin": "https://linkedin.com/in/meiling-wong-singapore",
+        "specialties": ["Data Center", "Tech Properties"],
+        "yearsOfExperience": 6,
+        "bio": "Tech infrastructure and data center specialist."
+      }
+    ],
     "featured": true,
     "verified": true,
     "rating": 4.8,
@@ -574,6 +748,7 @@
       "country": "AU"
     },
     "logo": "/images/icons/png/sydney-coastal-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-1.mp4",
     "brandColor": "#0ea5e9",
     "stats": {
       "activeListings": 132,
@@ -583,6 +758,34 @@
     },
     "specialties": ["Waterfront", "Resort", "Villa"],
     "serviceAreas": ["Bondi", "Manly", "Palm Beach", "Barangaroo"],
+    "employees": [
+      {
+        "id": "emp-012-1",
+        "name": "Jack Harrison",
+        "position": "Director",
+        "photo": "https://randomuser.me/api/portraits/men/71.jpg",
+        "email": "jack@coastalliving.au",
+        "phone": "+61 412 345 678",
+        "languages": ["English"],
+        "linkedin": "https://linkedin.com/in/jack-harrison-sydney",
+        "specialties": ["Waterfront", "Resort"],
+        "yearsOfExperience": 13,
+        "bio": "Sydney waterfront and coastal resort property specialist."
+      },
+      {
+        "id": "emp-012-2",
+        "name": "Sarah Mitchell",
+        "position": "Sales Manager",
+        "photo": "https://randomuser.me/api/portraits/women/54.jpg",
+        "email": "sarah@coastalliving.au",
+        "phone": "+61 423 456 789",
+        "languages": ["English", "French"],
+        "linkedin": "https://linkedin.com/in/sarah-mitchell-sydney",
+        "specialties": ["Villa", "Luxury Coastal"],
+        "yearsOfExperience": 7,
+        "bio": "Bondi and Palm Beach luxury villa expert."
+      }
+    ],
     "featured": false,
     "verified": true,
     "rating": 4.6,

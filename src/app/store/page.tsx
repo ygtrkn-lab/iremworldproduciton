@@ -92,10 +92,10 @@ export default function StoresPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar Filters - Modern LinkedIn style */}
+          {/* Sidebar Filters - Modern Clean Style */}
           <aside className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-24">
-              <div className="p-5 bg-gradient-to-r from-[#f07f38] to-[#ff9f5a] text-white">
+              <div className="p-5 bg-[#f07f38] text-white">
                 <h2 className="font-bold text-base flex items-center gap-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -124,45 +124,55 @@ export default function StoresPage() {
                   </div>
                 </div>
 
-                {/* City Filter */}
-                <div>
+                {/* City Filter - Custom Dropdown */}
+                <div className="relative">
                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 block">
                     Şehir
                   </label>
-                  <select
-                    value={cityFilter}
-                    onChange={e => setCityFilter(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent bg-white transition-all cursor-pointer"
-                  >
-                    <option value="">Tümü</option>
-                    {cities.map(city => (
-                      <option key={city} value={city}>
-                        {city}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={cityFilter}
+                      onChange={e => setCityFilter(e.target.value)}
+                      className="w-full appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent bg-white transition-all cursor-pointer hover:border-gray-400"
+                    >
+                      <option value="">Tümü</option>
+                      {cities.map(city => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
+                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
 
-                {/* Specialty Filter */}
-                <div>
+                {/* Specialty Filter - Custom Dropdown */}
+                <div className="relative">
                   <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 block">
                     Uzmanlık
                   </label>
-                  <select
-                    value={specialtyFilter}
-                    onChange={e => setSpecialtyFilter(e.target.value)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent bg-white transition-all cursor-pointer"
-                  >
-                    <option value="">Tümü</option>
-                    {allSpecialties.map(spec => (
-                      <option key={spec} value={spec}>
-                        {spec}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={specialtyFilter}
+                      onChange={e => setSpecialtyFilter(e.target.value)}
+                      className="w-full appearance-none px-4 py-2.5 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent bg-white transition-all cursor-pointer hover:border-gray-400"
+                    >
+                      <option value="">Tümü</option>
+                      {allSpecialties.map(spec => (
+                        <option key={spec} value={spec}>
+                          {spec}
+                        </option>
+                      ))}
+                    </select>
+                    <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
 
-                {/* Featured Toggle */}
+                {/* Featured Toggle - Clean Switch */}
                 <div className="pt-5 border-t border-gray-200">
                   <label className="flex items-center cursor-pointer group">
                     <div className="relative">
@@ -172,7 +182,7 @@ export default function StoresPage() {
                         onChange={e => setShowFeaturedOnly(e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07f38]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#f07f38] peer-checked:to-[#ff9f5a]"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07f38]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#f07f38]"></div>
                     </div>
                     <span className="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">Sadece Öne Çıkanlar</span>
                   </label>
@@ -239,12 +249,12 @@ export default function StoresPage() {
                               </div>
                               <div className="flex gap-2 ml-4">
                                 {store.featured && (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-400 to-amber-500 text-white shadow-sm">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#fbbf24] text-white shadow-sm">
                                     ⭐ Öne Çıkan
                                   </span>
                                 )}
                                 {store.verified && (
-                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-sm">
+                                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#10b981] text-white shadow-sm">
                                     <svg className="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                     </svg>
