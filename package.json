@@ -15,7 +15,7 @@
     "@types/bcryptjs": "^2.4.6",
     "@types/dompurify": "^3.0.5",
     "bcryptjs": "^3.0.2",
-    "cloudinary": "^2.7.0",
+    "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
     "country-flag-icons": "^1.5.21",
     "country-state-city": "^3.2.1",
@@ -56,5 +56,10 @@
     "tailwindcss": "^3.4.0",
     "tsx": "^4.20.3",
     "typescript": "^5"
+  }
+  ,
+  "overrides": {
+    "rimraf": "^4.0.0",
+    "glob": "^9.3.6"
   }
 }
