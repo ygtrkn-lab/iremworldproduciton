@@ -104,7 +104,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/luxury-homes-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-1.mp4",
+    "coverImage": "/images/headers/luxury-istanbul.jpg",
     "brandColor": "#d97706",
     "stats": {
       "activeListings": 78,
@@ -181,7 +181,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/ankara-modern-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-2.mp4",
+    "coverImage": "/images/headers/ankara-modern.jpg",
     "brandColor": "#059669",
     "stats": {
       "activeListings": 112,
@@ -246,7 +246,7 @@
       "country": "AE"
     },
     "logo": "/images/icons/png/dubai-property-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-3.mp4",
+    "coverImage": "/images/headers/dubai-skyline.jpg",
     "brandColor": "#dc2626",
     "stats": {
       "activeListings": 230,
@@ -310,7 +310,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/izmir-sahil-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-4.mp4",
+    "coverImage": "/images/headers/izmir-coast.jpg",
     "brandColor": "#0891b2",
     "stats": {
       "activeListings": 95,
@@ -375,7 +375,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/antalya-investment-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-5.mp4",
+    "coverImage": "/images/headers/antalya-resort.jpg",
     "brandColor": "#ea580c",
     "stats": {
       "activeListings": 145,
@@ -440,7 +440,7 @@
       "country": "GB"
     },
     "logo": "/images/icons/png/london-prime-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-6.mp4",
+    "coverImage": "/images/headers/london-prime.jpg",
     "brandColor": "#1d4ed8",
     "stats": {
       "activeListings": 165,
@@ -504,7 +504,7 @@
       "country": "US"
     },
     "logo": "/images/icons/png/ny-skyline-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-7.mp4",
+    "coverImage": "/images/headers/nyc-skyline.jpg",
     "brandColor": "#dc2626",
     "stats": {
       "activeListings": 320,
@@ -568,7 +568,7 @@
       "country": "DE"
     },
     "logo": "/images/icons/png/berlin-urban-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-8.mp4",
+    "coverImage": "/images/headers/berlin-urban.jpg",
     "brandColor": "#0f766e",
     "stats": {
       "activeListings": 142,
@@ -628,7 +628,7 @@
       "country": "FR"
     },
     "logo": "/images/icons/png/paris-heritage-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-9.mp4",
+    "coverImage": "/images/headers/paris-heritage.jpg",
     "brandColor": "#a16207",
     "stats": {
       "activeListings": 88,
@@ -688,7 +688,7 @@
       "country": "SG"
     },
     "logo": "/images/icons/png/sg-harbour-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-10.mp4",
+    "coverImage": "/images/headers/singapore-marina.jpg",
     "brandColor": "#2563eb",
     "stats": {
       "activeListings": 205,
@@ -748,7 +748,7 @@
       "country": "AU"
     },
     "logo": "/images/icons/png/sydney-coastal-logo.png",
-    "coverImage": "/videos/portal-bg/irem-portal-bg-1.mp4",
+    "coverImage": "/images/headers/sydney-coastal.jpg",
     "brandColor": "#0ea5e9",
     "stats": {
       "activeListings": 132,
