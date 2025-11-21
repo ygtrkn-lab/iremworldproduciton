@@ -221,9 +221,8 @@ const systemPrompt = `Sen IREMWORLD'ün yapay zeka asistanısın. Seçilen ülke
   `5. Kullanıcının dilinde yanıt ver.\n` +
   `İLAN ARAMA: Eğer sistem sana "İLAN ARAMA SONUÇLARI" context'i verdiyse:\n` +
   `- Önce "Toplam X ilan bulundu" yaz\n` +
-  `- Her ilan için numara, başlık, fiyat, konum ve link bilgilerini listele\n` +
-  `- Linkleri DÜZ METİN olarak yaz, Markdown formatı kullanma\n` +
-  `- Format: "İlan Detayları: https://iremworld.com/property/ID"\n` +
+  `- Her ilan için numara, başlık, fiyat, konum bilgilerini listele\n` +
+  `- Link'i tam URL olarak ver: <a href=\"URL\" target=\"_blank\">İlan Detayları</a>\n` +
   `- Kısa ve öz tut, gereksiz açıklama yapma\n` +
   `AMAÇ: Hızlı ve faydalı bilgi sağla.`;
 
@@ -513,9 +512,9 @@ export async function POST(request: NextRequest) {
           `   - Konum: ${p.city}${p.district ? `, ${p.district}` : ''}${p.neighborhood ? `, ${p.neighborhood}` : ''}\n` +
           `   - Fiyat: ${p.price.toLocaleString('tr-TR')} TL | Alan: ${p.netSize}m²\n` +
           `   - Oda: ${p.rooms} | Yaş: ${p.age} yıl\n` +
-          `   - Link: https://iremworld.com${p.link}`
+          `   - Link: https://iremworld.com/property/${p.id}`
         ).join('\n\n') +
-        `\n\nBu ilanları kullanıcıya özetle ve linkleri paylaş. Gerçek ilan verileri bunlardır.`;
+        `\n\nBu ilanları kullanıcıya özetle ve HTML link formatında paylaş: <a href=\"https://iremworld.com/property/ID\" target=\"_blank\">İlan Detayları</a>. Gerçek ilan ID'lerini kullan.`;
       
       messages.push({ role: 'system', content: searchContext });
     }
