@@ -75,7 +75,7 @@ export default function ModernNavbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       setIsSearchOpen(false);
-      router.push(`/for-sale?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/property?search=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery('');
     }
   };
@@ -468,7 +468,7 @@ export default function ModernNavbar() {
               <button
                 onClick={() => {
                   setIsSearchOpen(false);
-                  router.push('/for-sale?type=sale');
+                  router.push('/property?type=sale');
                 }}
                 className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(59,130,246,0.3)] active:scale-[0.98]"
               >
@@ -483,7 +483,7 @@ export default function ModernNavbar() {
               <button
                 onClick={() => {
                   setIsSearchOpen(false);
-                  router.push('/for-sale?type=rent');
+                  router.push('/property?type=rent');
                 }}
                 className="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-600 rounded-3xl p-8 text-left transition-all hover:scale-[1.02] hover:shadow-[0_20px_50px_rgb(168,85,247,0.3)] active:scale-[0.98]"
               >
@@ -565,7 +565,7 @@ export default function ModernNavbar() {
                     key={term}
                     onClick={() => {
                       setIsSearchOpen(false);
-                      router.push(`/for-sale?search=${encodeURIComponent(term)}`);
+                      router.push(`/property?search=${encodeURIComponent(term)}`);
                     }}
                     className="px-5 py-2.5 bg-white/80 hover:bg-white border border-slate-200/60 hover:border-slate-300 text-slate-700 hover:text-slate-900 rounded-full text-sm font-medium transition-all hover:shadow-sm"
                   >
