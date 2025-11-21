@@ -316,9 +316,13 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // If model says it's not relevant with high confidence, block
+    // If model says it's not relevant with high confidence, consider topic override then block if still irrelevant
     if (!classifier.relevant && classifier.confidence > 0.6 && !mentionedInTranscript) {
-      const assistantReply = `Ben IREMWORLD’ün yapay zeka asistanıyım. Yapay Zeka yalnızca seçilen ülke ve ülkeye dair yatırım/yaşam/ekonomi/vb. konuları kapsar. Lütfen ${countryName || 'seçilen ülke'} hakkında bir soru sorunuz. Örnekler: "${countryName || 'Bu ülke'}'deki vergi sistemi nasıl?", "${countryName || 'Bu ülke'}'de nüfus ve yaşam kalitesi nasıldır?", "${countryName || 'Bu ülke'}'de yatırım için tercih edilen bölgeler nereleri?"`;
+      // Allow if message still matches an allowed country-level topic (e.g. user selected country but didn't mention it explicitly)
+      if (isAboutAllowedCountryTopic(message)) {
+        classifier = { relevant: true, confidence: classifier.confidence, reason: 'topic_override' } as any;
+      } else {
+        const assistantReply = `Bu soru seçilen ülke ile ilgili görünmüyor. Lütfen ${countryName || 'seçilen ülke'} hakkında aşağıdaki konulardan biriyle ilgili soru sorunuz: Vergi Sistemi, Nüfus, Din / Kültür, İpotek / Mortgage, Kira Fiyatları, Yatırım Bölgeleri, Yaşam Kalitesi.`;
 
       // Log blocked logic
       try {
@@ -339,7 +343,8 @@ export async function POST(request: NextRequest) {
         // ignore
       }
 
-      return NextResponse.json({ answer: assistantReply, skipped: true });
+        return NextResponse.json({ answer: assistantReply, skipped: true });
+      }
     }
 
     // If classifier is uncertain, use token-based fallback: if already has country mention, allow.
@@ -356,27 +361,32 @@ export async function POST(request: NextRequest) {
 
       // confidence rule: if sim high (>=0.28) allow; if low and classifier unsure, block and log
       if (sim < 0.28) {
-        const assistantReply = `Ben IREMWORLD’ün yapay zeka asistanıyım. Sorduğunuz soru ${countryName || 'seçilen ülke'} ile ilgili görünmüyor. Lütfen daha spesifik soru sorunuz veya ülkeyi net belirtiniz.`;
+        // Allow topic override even if similarity is low
+        if (isAboutAllowedCountryTopic(message)) {
+          classifier = { relevant: true, confidence: classifier.confidence, reason: 'similarity_topic_override' } as any;
+        } else {
+          const assistantReply = `Bu soru ${countryName || 'seçilen ülke'} ile ilgili görünmüyor. Lütfen daha spesifik ülke odaklı soru sorunuz veya ülkeyi açıkça belirtiniz.`;
 
-        try {
-          fileLogActivity(
-            request.headers.get('x-user-id') || 'anonymous',
-            request.headers.get('x-user-name') || 'Anonymous',
-            request.headers.get('x-user-email') || '',
-            'ai_insight_blocked',
-            `Ambiguous blocked: ${message.slice(0, 240)} (sim=${sim}, classifier=${classifier.confidence})`,
-            request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
-            request.headers.get('user-agent') || 'Unknown',
-            'system',
-            undefined,
-            'warning',
-            { classifier, sim }
-          );
-        } catch {
-          // ignore
+          try {
+            fileLogActivity(
+              request.headers.get('x-user-id') || 'anonymous',
+              request.headers.get('x-user-name') || 'Anonymous',
+              request.headers.get('x-user-email') || '',
+              'ai_insight_blocked',
+              `Ambiguous blocked: ${message.slice(0, 240)} (sim=${sim}, classifier=${classifier.confidence})`,
+              request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
+              request.headers.get('user-agent') || 'Unknown',
+              'system',
+              undefined,
+              'warning',
+              { classifier, sim }
+            );
+          } catch {
+            // ignore
+          }
+
+          return NextResponse.json({ answer: assistantReply, skipped: true });
         }
-
-        return NextResponse.json({ answer: assistantReply, skipped: true });
       }
     }
 
@@ -450,39 +460,13 @@ export async function POST(request: NextRequest) {
     // Skip continuation for performance - keep responses concise for faster delivery
     // If answer is cut off, user can ask follow-up questions
 
-    // Ensure every assistant output references IREMWORLD's AI assistant.
-    // If the model already mentions 'yapay zeka asistan', replace the generic
-    // 'Ben ... yapay zeka asistanıyım' with the branded phrase; otherwise prefix it.
-    const ensureBrand = (text: string) => {
-      const brand = 'Ben IREMWORLD’ün yapay zeka asistanıyım.';
-      if (!text) return brand;
-
-      const normalized = (text || '').toLowerCase();
-
-      // already references IREMWORLD -> keep as-is
-      if (normalized.includes('iremworld') || normalized.includes('irem')) {
-        // If the response already mentions the brand but also has a non-branded
-        // 'Ben ... yapay zeka asistanıyım', remove that extra phrase to avoid
-        // duplication.
-        const assistantMatch = /\bben\b[\s\S]{0,80}?yapay\s+zeka\s+asistan(?:[ıi]yım|ım)?/i;
-        if (assistantMatch.test(text)) {
-          return text.replace(assistantMatch, '').replace(/\s{2,}/g, ' ').trim();
-        }
-        return text;
-      }
-
-      // If the model already claims to be 'yapay zeka asistanı', replace with brand
-      const assistantMatch = /\bben\b[\s\S]{0,80}?yapay\s+zeka\s+asistan(?:[ıi]yım|ım)?/i;
-      if (assistantMatch.test(text)) {
-        // Replace the first occurrence of that phrase with our brand phrase
-        return text.replace(assistantMatch, brand);
-      }
-
-      // Otherwise, prefix the brand sentence
-      return `${brand} ${text}`;
+    // Remove forced brand prefix; keep answer concise and avoid repeating assistant identity.
+    const sanitizeReply = (text: string) => {
+      if (!text) return '';
+      return text.replace(/^Ben IREMWORLD’ün yapay zeka asistanıyım\.?\s*/i, '').trim();
     };
 
-    const finalReply = ensureBrand(assistantReply);
+    const finalReply = sanitizeReply(assistantReply);
 
     if (!finalReply) {
       return NextResponse.json(
