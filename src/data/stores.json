@@ -104,7 +104,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/luxury-homes-logo.png",
-    "coverImage": "/uploads/des/luxury-istanbul.jpg",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-1.mp4",
     "brandColor": "#d97706",
     "stats": {
       "activeListings": 78,
@@ -125,7 +125,8 @@
         "languages": ["Türkçe", "İngilizce"],
         "linkedin": "https://linkedin.com/in/serkan-demir-luxury",
         "specialties": ["Lüks Konut", "Penthouse"],
-        "yearsOfExperience": 15
+        "yearsOfExperience": 15,
+        "bio": "15 yıllık gayrimenkul deneyimi ile İstanbul'un en prestijli semtlerinde lüks konut satışlarında uzman."
       },
       {
         "id": "emp-002-2",
@@ -133,10 +134,25 @@
         "position": "Lüks Konut Uzmanı",
         "photo": "https://randomuser.me/api/portraits/women/65.jpg",
         "email": "elif@luxuryhomesistanbul.com",
+        "phone": "+90 532 222 3344",
         "languages": ["Türkçe", "İngilizce", "İtalyanca"],
         "linkedin": "https://linkedin.com/in/elif-yildiz-luxury",
         "specialties": ["Boğaz Manzaralı", "Tarihi Konaklar"],
-        "yearsOfExperience": 7
+        "yearsOfExperience": 7,
+        "bio": "Boğaz manzaralı konutlar ve tarihi konaklarda uzman danışman."
+      },
+      {
+        "id": "emp-002-3",
+        "name": "Murat Aydın",
+        "position": "Satış Müdürü",
+        "photo": "https://randomuser.me/api/portraits/men/82.jpg",
+        "email": "murat@luxuryhomesistanbul.com",
+        "phone": "+90 532 333 4455",
+        "languages": ["Türkçe", "İngilizce", "Arapça"],
+        "linkedin": "https://linkedin.com/in/murat-aydin-sales",
+        "specialties": ["Lüks Konut", "Uluslararası Müşteri"],
+        "yearsOfExperience": 10,
+        "bio": "Uluslararası müşterilere lüks konut satışında deneyimli."
       }
     ],
     "featured": true,
@@ -165,6 +181,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/ankara-modern-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-2.mp4",
     "brandColor": "#059669",
     "stats": {
       "activeListings": 112,
@@ -174,6 +191,34 @@
     },
     "specialties": ["Konut", "Ofis", "Dükkan", "İş Merkezi"],
     "serviceAreas": ["Çankaya", "Yenimahalle", "Keçiören", "Etimesgut"],
+    "employees": [
+      {
+        "id": "emp-003-1",
+        "name": "Ahmet Kılıç",
+        "position": "Genel Müdür",
+        "photo": "https://randomuser.me/api/portraits/men/45.jpg",
+        "email": "ahmet@ankaramodern.com",
+        "phone": "+90 532 444 5566",
+        "languages": ["Türkçe", "İngilizce"],
+        "linkedin": "https://linkedin.com/in/ahmet-kilic-ankara",
+        "specialties": ["Ticari Gayrimenkul", "İş Merkezi"],
+        "yearsOfExperience": 12,
+        "bio": "Ankara'da 12 yıldır ticari gayrimenkul ve ofis satışında deneyimli."
+      },
+      {
+        "id": "emp-003-2",
+        "name": "Selin Öz",
+        "position": "Konut Danışmanı",
+        "photo": "https://randomuser.me/api/portraits/women/28.jpg",
+        "email": "selin@ankaramodern.com",
+        "phone": "+90 532 555 6677",
+        "languages": ["Türkçe"],
+        "linkedin": "https://linkedin.com/in/selin-oz-realestate",
+        "specialties": ["Konut", "Daire"],
+        "yearsOfExperience": 5,
+        "bio": "Ankara'nın merkezi lokasyonlarında konut satışı uzmanı."
+      }
+    ],
     "featured": false,
     "verified": true,
     "rating": 4.4,
@@ -201,7 +246,7 @@
       "country": "AE"
     },
     "logo": "/images/icons/png/dubai-property-logo.png",
-    "coverImage": "/uploads/des/dubai-skyline.jpg",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-3.mp4",
     "brandColor": "#dc2626",
     "stats": {
       "activeListings": 230,
@@ -211,6 +256,34 @@
     },
     "specialties": ["Lüks Konut", "Ticari Gayrimenkul", "Off-Plan Yatırım", "Golden Visa"],
     "serviceAreas": ["Dubai", "Abu Dhabi", "Sharjah", "Ras Al Khaimah"],
+    "employees": [
+      {
+        "id": "emp-004-1",
+        "name": "Yusuf Al-Maktoum",
+        "position": "Managing Director",
+        "photo": "https://randomuser.me/api/portraits/men/15.jpg",
+        "email": "yusuf@dubaipropertygroup.ae",
+        "phone": "+971 50 123 4567",
+        "languages": ["English", "Arabic", "Turkish"],
+        "linkedin": "https://linkedin.com/in/yusuf-almaktoum",
+        "specialties": ["Luxury Real Estate", "Off-Plan Investment"],
+        "yearsOfExperience": 15,
+        "bio": "Dubai luxury real estate expert with 15 years of experience."
+      },
+      {
+        "id": "emp-004-2",
+        "name": "Fatma Hassan",
+        "position": "Senior Consultant",
+        "photo": "https://randomuser.me/api/portraits/women/12.jpg",
+        "email": "fatma@dubaipropertygroup.ae",
+        "phone": "+971 50 234 5678",
+        "languages": ["English", "Arabic", "Turkish", "Russian"],
+        "linkedin": "https://linkedin.com/in/fatma-hassan-dubai",
+        "specialties": ["Golden Visa", "Turkish Investors"],
+        "yearsOfExperience": 8,
+        "bio": "Specializing in Turkish and Russian investors seeking Dubai properties."
+      }
+    ],
     "featured": true,
     "verified": true,
     "rating": 4.9,
@@ -237,6 +310,7 @@
       "country": "TR"
     },
     "logo": "/images/icons/png/izmir-sahil-logo.png",
+    "coverImage": "/videos/portal-bg/irem-portal-bg-4.mp4",
     "brandColor": "#0891b2",
     "stats": {
       "activeListings": 95,
@@ -246,6 +320,34 @@
     },
     "specialties": ["Sahil Konut", "Yazlık Villa", "Apart Otel", "Yatırım"],
     "serviceAreas": ["Alsancak", "Karşıyaka", "Çeşme", "Alaçatı", "Foça"],
+    "employees": [
+      {
+        "id": "emp-005-1",
+        "name": "Deniz Özkan",
+        "position": "Kurucu Ortak",
+        "photo": "https://randomuser.me/api/portraits/men/38.jpg",
+        "email": "deniz@izmirsahil.com",
+        "phone": "+90 532 666 7788",
+        "languages": ["Türkçe", "İngilizce"],
+        "linkedin": "https://linkedin.com/in/deniz-ozkan-izmir",
+        "specialties": ["Sahil Konut", "Yazlık Villa"],
+        "yearsOfExperience": 9,
+        "bio": "İzmir sahil şeridinde 9 yıldır yazlık ve deniz manzaralı konutlarda uzman."
+      },
+      {
+        "id": "emp-005-2",
+        "name": "Merve Çelik",
+        "position": "Satış Danışmanı",
+        "photo": "https://randomuser.me/api/portraits/women/35.jpg",
+        "email": "merve@izmirsahil.com",
+        "phone": "+90 532 777 8899",
+        "languages": ["Türkçe", "İngilizce", "Yunanca"],
+        "linkedin": "https://linkedin.com/in/merve-celik-izmir",
+        "specialties": ["Apart Otel", "Yatırım"],
+        "yearsOfExperience": 5,
+        "bio": "Alaçatı ve Çeşme bölgesinde apart otel yatırımları konusunda deneyimli."
+      }
+    ],
     "featured": false,
     "verified": true,
     "rating": 4.5,

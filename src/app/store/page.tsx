@@ -92,37 +92,47 @@ export default function StoresPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar Filters - LinkedIn style */}
+          {/* Sidebar Filters - Modern LinkedIn style */}
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden sticky top-24">
-              <div className="p-4 border-b border-gray-200">
-                <h2 className="font-semibold text-gray-900 text-sm">Filtrele</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-24">
+              <div className="p-5 bg-gradient-to-r from-[#f07f38] to-[#ff9f5a] text-white">
+                <h2 className="font-bold text-base flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  </svg>
+                  Filtrele
+                </h2>
               </div>
               
-              <div className="p-4 space-y-6">
+              <div className="p-5 space-y-5">
                 {/* Search */}
                 <div>
-                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                  <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 block">
                     Ara
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Mağaza ara..."
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
+                  <div className="relative">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                      type="text"
+                      placeholder="Mağaza ara..."
+                      value={searchTerm}
+                      onChange={e => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent transition-all"
+                    />
+                  </div>
                 </div>
 
                 {/* City Filter */}
                 <div>
-                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                  <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 block">
                     Şehir
                   </label>
                   <select
                     value={cityFilter}
                     onChange={e => setCityFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent bg-white transition-all cursor-pointer"
                   >
                     <option value="">Tümü</option>
                     {cities.map(city => (
@@ -135,13 +145,13 @@ export default function StoresPage() {
 
                 {/* Specialty Filter */}
                 <div>
-                  <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                  <label className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 block">
                     Uzmanlık
                   </label>
                   <select
                     value={specialtyFilter}
                     onChange={e => setSpecialtyFilter(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#f07f38] focus:border-transparent bg-white transition-all cursor-pointer"
                   >
                     <option value="">Tümü</option>
                     {allSpecialties.map(spec => (
@@ -153,15 +163,18 @@ export default function StoresPage() {
                 </div>
 
                 {/* Featured Toggle */}
-                <div className="pt-4 border-t border-gray-200">
-                  <label className="flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={showFeaturedOnly}
-                      onChange={e => setShowFeaturedOnly(e.target.checked)}
-                      className="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Sadece Öne Çıkanlar</span>
+                <div className="pt-5 border-t border-gray-200">
+                  <label className="flex items-center cursor-pointer group">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={showFeaturedOnly}
+                        onChange={e => setShowFeaturedOnly(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#f07f38]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-[#f07f38] peer-checked:to-[#ff9f5a]"></div>
+                    </div>
+                    <span className="ml-3 text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors">Sadece Öne Çıkanlar</span>
                   </label>
                 </div>
               </div>
