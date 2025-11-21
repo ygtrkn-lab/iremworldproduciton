@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+// Silence typescript about process in SSR layout
+declare const process: any;
 import { Inter, Poppins, Dancing_Script } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
@@ -130,6 +132,14 @@ export default function RootLayout({
         
         {/* 360 Viewer */}
         <script src="https://cdn.jsdelivr.net/npm/marzipano@0.10.2/dist/marzipano.min.js" async></script>
+        {/* Dev-only: detect and log any script tags that accidentally load CSS (helps debug MIME type errors). Only runs in non-production. */}
+        {process.env.NODE_ENV !== 'production' && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{document.querySelectorAll('script').forEach(s =>{ if(s.src && s.src.split('?')[0].endsWith('.css')) { console.warn('Possible incorrect script loading CSS:', s.src, s); } }); } catch(e) { /* ignore */ }})();`,
+            }}
+          />
+        )}
         {/* Structured Data JSON-LD */}
         <script
           type="application/ld+json"

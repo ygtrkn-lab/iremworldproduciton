@@ -18,6 +18,8 @@ const nextConfig = {
     optimizePackageImports: ['@mui/material', '@mui/icons-material'],
     // WebAssembly optimizasyonu
     webVitalsAttribution: ['CLS', 'LCP'],
+    // WebAssembly devre dışı bırak
+    disableWebAssembly: true,
     // Chunk boyutlarını küçült
     largePageDataBytes: 128 * 1000,
   },
@@ -84,11 +86,10 @@ const nextConfig = {
   // Production için ek optimizasyonlar
   compress: true,
   poweredByHeader: false,
+  swcMinify: true,
   
   // Static file serving optimizasyonu ve Security Headers
   async headers() {
-    const isDev = process.env.NODE_ENV === 'development';
-    
     return [
       {
         source: '/:path*',
@@ -119,33 +120,51 @@ const nextConfig = {
             value: 'max-age=63072000; includeSubDomains; preload'
           },
           // Content Security Policy - XSS ve injection koruması (Development-friendly)
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://cdn-ukwest.onetrust.com https://static.cloudflareinsights.com https://unpkg.com https://cdn.maptiler.com https://api.mapbox.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdn.maptiler.com https://api.mapbox.com",
-              "img-src 'self' data: blob: https: http:",
-              "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
-              "connect-src 'self' http://localhost:* ws://localhost:* https://localhost:* https://www.google-analytics.com https://www.googletagmanager.com https://*.iremworld.com https://iremworld.com http://iremworld.com https://www.iremworld.com https://api.maptiler.com https://api.mapbox.com https://*.tiles.mapbox.com https://libretranslate.com https://libretranslate.de",
-              "frame-src 'self' https://www.google.com https://*.google.com https://maps.google.com https://www.youtube.com",
-              "worker-src 'self' blob:",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'self'"
-            ].join('; ')
-          },
+          (() => {
+            const enabled = process.env.ENABLE_GOOGLE_TRANSLATE === 'true';
+            const scriptSrc = [
+              "'self'",
+              "'unsafe-inline'",
+              "'unsafe-eval'",
+              'https://cdn.jsdelivr.net',
+              'https://www.googletagmanager.com',
+              'https://www.google-analytics.com',
+              'https://cdn-ukwest.onetrust.com',
+              'https://static.cloudflareinsights.com',
+              'https://unpkg.com',
+              'https://cdn.maptiler.com',
+              'https://api.mapbox.com'
+            ];
+            if (enabled) scriptSrc.push('https://translate.google.com');
+
+            return {
+              key: 'Content-Security-Policy',
+              value: [
+                "default-src 'self'",
+                `script-src ${scriptSrc.join(' ')}`,
+                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdn.maptiler.com https://api.mapbox.com",
+                "img-src 'self' data: blob: https: http:",
+                "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net",
+                "connect-src 'self' http://localhost:* ws://localhost:* https://localhost:* https://www.google-analytics.com https://www.googletagmanager.com https://*.iremworld.com https://iremworld.com http://iremworld.com https://www.iremworld.com https://api.maptiler.com https://api.mapbox.com https://*.tiles.mapbox.com",
+                "frame-src 'self' https://www.google.com https://*.google.com https://maps.google.com https://www.youtube.com",
+                "worker-src 'self' blob:",
+                "object-src 'none'",
+                "base-uri 'self'",
+                "form-action 'self'",
+                "frame-ancestors 'self'"
+              ].join('; ')
+            };
+          })(),
           // Cross-Origin Resource Policy - Kaynak paylaşım kontrolü
           {
             key: 'Cross-Origin-Resource-Policy',
             value: 'cross-origin'
           },
-          // Cross-Origin-Opener-Policy - Tarayıcı izolasyonu (sadece production)
-          ...(isDev ? [] : [{
+          // Cross-Origin-Opener-Policy - Tarayıcı izolasyonu
+          {
             key: 'Cross-Origin-Opener-Policy',
             value: 'same-origin-allow-popups'
-          }]),
+          },
           // Server bilgisi gizleme
           {
             key: 'X-Powered-By',
@@ -172,10 +191,6 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
-          },
-          {
-            key: 'Cross-Origin-Resource-Policy',
-            value: 'cross-origin'
           },
         ],
       },

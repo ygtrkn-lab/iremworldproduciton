@@ -1840,7 +1840,8 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    // Client-side guard: refuse if the question is not about the selected country
+    // Client-side guard: refuse if the question is not about the selected country.
+    // However allow queries about common country-level topics (taxes, population, investment etc.) if a country is selected.
     const normalizedMsg = trimmed.toLowerCase();
     const cNameLower = selectedCountry?.name?.toLowerCase() ?? '';
     const allowedCountryPhrases = [
@@ -1859,7 +1860,32 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
     const containsCountryPhrase = allowedCountryPhrases.some(p => normalizedMsg.includes(p));
     const mentionedPreviously = insightMessages.some(m => (m.content || '').toLowerCase().includes(cNameLower));
 
-    if (!(mentionsCountryName || containsCountryPhrase || mentionedPreviously)) {
+    const allowedTopics = [
+      'vergi','vergi sistemi','vergi oranı','tax','taxation',
+      'nüfus','population','din','religion','inanç',
+      'yatırım','investment','yatırım bölgeleri','yaşam','yaşam kalitesi','life quality',
+      'kira','kiralar','kira fiyatı','kira fiyatları','rent','rental','ipotek','mortgage','konut kredisi'
+    ];
+
+    const normalizeText = (s?: string | null) => {
+      try {
+        if (!s) return '';
+        return s.normalize('NFD').replace(/\p{Diacritic}/gu, '').replace(/[\p{P}\p{S}]/gu, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+      } catch {
+        return (s || '').toLowerCase();
+      }
+    };
+
+    const containsAllowedTopic = (text: string | undefined | null) => {
+      const norm = normalizeText(text);
+      if (!norm) return false;
+      return allowedTopics.some(t => norm.includes(t));
+    };
+
+    // Allowed if the message contains an allowed topic and either mentions the country
+    // explicitly OR selectedCountry is set. This prevents unrelated country mentions.
+    const mentionsCountryAndTopic = mentionsCountryName && containsAllowedTopic(trimmed);
+    if (!(mentionsCountryAndTopic || containsCountryPhrase || mentionedPreviously || (selectedCountry && containsAllowedTopic(trimmed)))) {
             const assistantReply = `Ben IREMWORLD’ün yapay zeka asistanıyım. Sadece seçilen ülke hakkında soru sorabilirsiniz: ${selectedCountry?.name || 'Ülke seçiniz'}.`;
       const assistantMsg: InsightMessage = {
         id: `assistant-${new Date().toISOString()}`,
@@ -3031,6 +3057,34 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                         Yatırım Bölgeleri
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInsightInput(`${selectedCountry?.name || 'Bu ülke'}'de nüfus kaç?`)}
+                        className="inline-flex items-center gap-1.5 px-3 xs:px-3.5 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm rounded-full border border-[#ffd7ba] bg-[#fff7f2] text-[#f07f38] hover:bg-[#ffede1] hover:border-[#ffc59a] transition-all duration-200"
+                      >
+                        Nüfus
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInsightInput(`${selectedCountry?.name || 'Bu ülke'}'de din ve kültür hakkında bilgi ver`)}
+                        className="inline-flex items-center gap-1.5 px-3 xs:px-3.5 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm rounded-full border border-[#ffd7ba] bg-[#fff7f2] text-[#f07f38] hover:bg-[#ffede1] hover:border-[#ffc59a] transition-all duration-200"
+                      >
+                        Din / Kültür
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInsightInput(`${selectedCountry?.name || 'Bu ülke'}'de mortgage ve kredi koşulları nasıldır?`)}
+                        className="inline-flex items-center gap-1.5 px-3 xs:px-3.5 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm rounded-full border border-[#ffd7ba] bg-[#fff7f2] text-[#f07f38] hover:bg-[#ffede1] hover:border-[#ffc59a] transition-all duration-200"
+                      >
+                        İpotek / Mortgage
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInsightInput(`${selectedCountry?.name || 'Bu ülke'}'deki kira fiyatları ve kiralar hakkında bilgi ver`)}
+                        className="inline-flex items-center gap-1.5 px-3 xs:px-3.5 sm:px-4 py-1.5 xs:py-2 text-[10px] xs:text-xs sm:text-sm rounded-full border border-[#ffd7ba] bg-[#fff7f2] text-[#f07f38] hover:bg-[#ffede1] hover:border-[#ffc59a] transition-all duration-200"
+                      >
+                        Kira Fiyatları
                       </button>
                       <button
                         type="button"

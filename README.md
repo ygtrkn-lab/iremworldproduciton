@@ -91,3 +91,21 @@ GOOGLE_REDIRECT_URI=https://your-domain.com/api/auth/google/callback
 ## Contact
 
 If you want me to finish and push to GitHub and connect Vercel for you, share your GitHub username and whether the repository should be public or private. I can then provide exact commands to run on your machine.
+
+## Troubleshooting & Notes
+
+- If you see a DevTools warning like:
+	"Loading the script 'https://translate.google.com/..' violates the Content Security Policy: 'script-src' ..."
+	then either:
+	- Enable the translation widget by setting env vars: `ENABLE_GOOGLE_TRANSLATE=true` (server) and `NEXT_PUBLIC_ENABLE_GOOGLE_TRANSLATE=true` (client) before building, or
+	- Remove/disable the language selector component (by not including it in your layout/pages).
+
+- If the AI insight endpoint returns 500: ensure `OPENAI_API_KEY` is set. The API now returns 503 when missing and logs a useful error with more context.
+
+- If you get the browser message:
+	`Refused to execute script from '/_next/static/css/xxxxx.css' because its MIME type ('text/css') is not executable` — this means a link to a CSS file is being attempted to be executed as a script. This usually occurs when some script uses a CSS URL in a `script` tag. Reproduce locally with DevTools Network & Call Stack to find the request source. Common causes include:
+	- Third-party widgets injecting remote resources (translate, GA, marzipano, etc.)
+	- Service worker or custom loader incorrectly mapping CSS as JS
+	- Programmatic creation of `<script>` elements where a `<link rel="stylesheet">` should be used
+
+	To debug: reproduce locally, open DevTools, filter the network to the CSS filename, open the initiator or call stack, and inspect which JS inserted the `<script>` tag.

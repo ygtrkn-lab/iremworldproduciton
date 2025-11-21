@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactCountryFlag from 'react-country-flag';
 
+// Silence TypeScript about process env in client code (NEXT_PUBLIC_* variables are injected at build-time)
+declare const process: any;
+
 // Google Translate desteklenen diller (ISO country codes ile)
 const languages = [
   { code: 'tr', name: 'Türkçe', nativeName: 'Türkçe', countryCode: 'TR' },
@@ -67,6 +70,7 @@ const languages = [
 
 export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
+  const [translateLoaded, setTranslateLoaded] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]); // Default: Türkçe
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -82,30 +86,46 @@ export default function LanguageSelector() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Google Translate widget'ı yükle
-  useEffect(() => {
-    // Google Translate script'ini ekle
+  // Google Translate widget'ı: yükleme artık çevre değişkeni ile kontrol edilebilir
+  // NEXT_PUBLIC_ENABLE_GOOGLE_TRANSLATE=false ise yüklenmez.
+  // We intentionally don't auto-load the external translate script on mount.
+  // Loading it on-demand (on open or on language change) avoids unnecessary network
+  // load and prevents CSP warnings for customers that don't enable translate.
+  const loadTranslateScript = () => {
+    if (translateLoaded) return;
+
+    const enabled = typeof window !== 'undefined' && ((process as any)?.env?.NEXT_PUBLIC_ENABLE_GOOGLE_TRANSLATE === 'true');
+    if (!enabled) return;
+
     if (!document.getElementById('google-translate-script')) {
       const script = document.createElement('script');
       script.id = 'google-translate-script';
-      script.src = '//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
       script.async = true;
+      script.onload = () => setTranslateLoaded(true);
+      script.onerror = () => {
+        console.warn('Failed to load google translate script (possibly blocked by CSP).');
+      };
       document.body.appendChild(script);
     }
 
-    // Google Translate initialize fonksiyonu
     (window as any).googleTranslateElementInit = function() {
-      new (window as any).google.translate.TranslateElement(
-        {
-          pageLanguage: 'tr',
-          includedLanguages: languages.map(lang => lang.code).join(','),
-          layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
-          autoDisplay: false,
-        },
-        'google_translate_element'
-      );
+      try {
+        new (window as any).google.translate.TranslateElement(
+          {
+            pageLanguage: 'tr',
+            includedLanguages: languages.map(lang => lang.code).join(','),
+            layout: (window as any).google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+          },
+          'google_translate_element'
+        );
+        setTranslateLoaded(true);
+      } catch (e) {
+        console.warn('Google Translate init failed:', e instanceof Error ? e.message : String(e));
+      }
     };
-  }, []);
+  };
 
   const handleLanguageChange = (language: typeof languages[0]) => {
     setSelectedLanguage(language);
@@ -136,7 +156,13 @@ export default function LanguageSelector() {
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => setIsOpen(!isOpen)}
+            onClick={() => {
+              const nextOpen = !isOpen;
+              setIsOpen(nextOpen);
+              if (nextOpen) {
+                loadTranslateScript();
+              }
+            }}
           className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md border border-gray-200 rounded-full hover:border-[#f07f38] hover:bg-white transition-all shadow-sm hover:shadow-md"
         >
           <ReactCountryFlag
@@ -199,6 +225,11 @@ export default function LanguageSelector() {
                   />
                 </div>
               </div>
+
+              {/* If translation is not enabled, show small info */}
+              {typeof window !== 'undefined' && ((process as any)?.env?.NEXT_PUBLIC_ENABLE_GOOGLE_TRANSLATE !== 'true') && (
+                <div className="px-4 py-2 text-xs text-gray-500">Çeviri aracı devre dışı. Çeviri yüklemek için `NEXT_PUBLIC_ENABLE_GOOGLE_TRANSLATE=true` olarak yapılandırın.</div>
+              )}
 
               {/* Language List */}
               <div className="max-h-96 overflow-y-auto">

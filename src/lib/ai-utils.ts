@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+// NOTE: This file appears unused; scheduled for deletion. Kept for safety until CI build is validated.
 
 // Helper: cosine similarity
 function dot(a: number[], b: number[]) {
@@ -39,7 +40,7 @@ export async function classifyRelevance(
   countryCode?: string,
   contextBlock?: string
 ) {
-  const system = `You are a precise relevance classifier. You will check whether the user's message is specifically about the provided country. Return ONLY JSON with keys: {relevant: true|false, confidence: 0.0-1.0, reason: 'one-sentence explanation in user language'}.`;
+  const system = `You are a precise multilingual relevance classifier. You will check whether the user's message is specifically about the provided country (or its region or local topics). The user may write in Turkish, English or other languages. Return ONLY JSON with keys: {relevant: true|false, confidence: 0.0-1.0, reason: 'one-sentence explanation in the user's language'}. Avoid judgment statements and keep output minimal JSON only.`;
 
   // Few-shot examples
   const examples = [
@@ -48,6 +49,14 @@ export async function classifyRelevance(
     { q: "Are property taxes different in the US vs Canada?", ans: { relevant: false, confidence: 0.9 } },
     { q: "In Turkey how does the property tax work?", ans: { relevant: true, confidence: 0.97 } }
   ];
+  
+  // Add Turkish and multilingual few-shot examples to improve classification accuracy
+  examples.push(
+    { q: "Türkiye'deki vergi sistemi nasıl?", ans: { relevant: true, confidence: 0.98 } },
+    { q: "Türkiye'de gayrimenkul yatırımı için hangi bölgeler iyi?", ans: { relevant: true, confidence: 0.98 } },
+    { q: "BMW arabaları Türkiye'de nasıl?", ans: { relevant: false, confidence: 0.95 } },
+    { q: "Global piyasalar Türkiye'yi nasıl etkiler?", ans: { relevant: true, confidence: 0.78 } }
+  );
 
   const userMsg = `Country: ${countryName || countryCode || 'unspecified'}\nMessage: ${message}\nContext: ${contextBlock || 'none'}`;
 

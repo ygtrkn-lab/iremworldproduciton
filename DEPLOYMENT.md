@@ -51,6 +51,9 @@ Production'da gerekli env variables:
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
 - `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`
+ - `OPENAI_API_KEY` (required to enable AI Insights at /api/ai/insight)
+ - `ENABLE_GOOGLE_TRANSLATE` (optional server-side; set to `true` to allow translation widget and update CSP)
+ - `NEXT_PUBLIC_ENABLE_GOOGLE_TRANSLATE` (optional client-side; set to `true` to enable widget on client)
 
 **Vercel Dashboard'dan ekleyin:** https://vercel.com/dashboard
 

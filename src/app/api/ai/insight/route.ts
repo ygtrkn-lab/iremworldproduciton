@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+// Silence typescript warnings about process in server code in this project
+declare const process: any;
 import { logActivity as fileLogActivity } from '@/lib/server-utils';
 import OpenAI from 'openai';
+import { classifyRelevance, similarityFallback } from '@/lib/ai-utils';
 
 // Vercel serverless function timeout configuration
 export const maxDuration = 30; // 30 seconds max (Vercel Pro: 60s, Hobby: 10s default)
@@ -76,6 +79,60 @@ const sanitizeConversation = (conversation: unknown): ConversationMessage[] => {
     .slice(-MAX_HISTORY_MESSAGES);
 };
 
+// Normalizes text to remove punctuation and unicode diacritics for stable comparisons
+const normalizeText = (s?: string | null) => {
+  if (!s) return '';
+  try {
+    // Remove diacritics (normalize -> NFD -> remove combining marks) and convert to lower-case
+    const stripped = s.normalize ? s.normalize('NFD').replace(/\p{Diacritic}/gu, '') : s;
+    // Remove punctuation and extra spaces
+    return stripped.replace(/[\p{P}\p{S}]/gu, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+  } catch {
+    return String(s).toLowerCase();
+  }
+};
+
+const isCountryMentionedInText = (text: string | undefined | null, countryName?: string, countryCode?: string) => {
+  const normalized = normalizeText(text);
+  if (!normalized) return false;
+  if (countryName && normalizeText(countryName) && normalized.includes(normalizeText(countryName))) return true;
+  if (countryCode && normalized.includes(String(countryCode).toLowerCase())) return true;
+
+  // Common reference phrases
+  const countryReferencePhrases = [
+    'bu ulke', 'secilen ulke', 'seçilen ülke', 'seçtiğim ülke', 'seçtiğiniz ülke', 'seçtiğimiz ülke', 'buradaki ülke', 'this country', 'selected country', 'the selected country'
+  ];
+  for (const phrase of countryReferencePhrases) {
+    if (normalized.includes(phrase.replace(/ç|ğ|ş|ı|ö|ü/g, ''))) return true;
+    if (normalized.includes(phrase)) return true;
+  }
+  return false;
+};
+
+// Topics allowed by the AI Assistant for country context — these are country-level
+// metadata and investor-oriented topics that are meaningful for property decisions.
+const allowedCountryTopics = [
+  'vergi', 'vergi sistemi', 'vergi oranı', 'tax', 'taxation',
+  'nüfus', 'population',
+  'din', 'religion', 'inanç',
+  'yatırım', 'investment', 'yatırım bölgeleri', 'yatırım fırsatı',
+  'yaşam', 'yaşam kalitesi', 'life quality', 'cost of living',
+  'kira', 'kiralar', 'kira fiyatları', 'rent', 'rental',
+  'fiyat', 'prime', 'fiyat aralığı', 'price',
+  'ekonomi', 'economic', 'ekonomik', 'inflation', 'enflasyon',
+  'bölge', 'region', 'location', 'location-based',
+  'ipotek', 'mortgage', 'konut kredisi', 'mortgage rate'
+];
+
+const isAboutAllowedCountryTopic = (text: string | undefined | null) => {
+  if (!text) return false;
+  const norm = normalizeText(text);
+  for (const phrase of allowedCountryTopics) {
+    if (norm.includes(phrase)) return true;
+  }
+  return false;
+};
+
 const buildContextBlock = (countryName?: string, countryCode?: string, context?: CountryContext) => {
   const rows: string[] = [];
 
@@ -141,22 +198,26 @@ const extractText = (content: string | Array<ChatCompletionContentPart | string>
 };
 
 const systemPrompt = `Sen IREMWORLD'ün premium gayrimenkul danışmanı AI asistanısın.\n` +
-  `Kullanıcılara seçtikleri ülke hakkında yatırım, yaşam ve gayrimenkul odaklı içgörüler ver.\n` +
-  `ÖNEMLİ GÜVENLİK KURALI: SADECE seçilen ülke hakkında soruları yanıtla. Başka ülkeler veya genel konular için kibarca reddet ve kullanıcıyı seçilen ülke hakkında soru sormaya yönlendir.\n` +
-  `Yanıtlarını kısa, öz ve hızlı anlaşılır tut (2-3 paragraf maksimum). Uzun açıklamalardan kaçın.\n` +
-  `Verileri güncel tut, varsayımlarını net belirt, gerektiğinde kaynak veya uzman desteği öner.\n` +
-  `Kullanıcının dili Türkçe değilse onun dilinde cevap ver; aksi halde Türkçe yanıtla.`;
-// Security: the assistant should only answer questions about the selected country
-// and should not answer general or cross-country questions.
-// The server also enforces a pre-check to block non-country queries to reduce API usage.
+  `Görevin, kullanıcılara seçtikleri ülke hakkında yatırım, yaşam ve gayrimenkul odaklı doğru ve güncel içgörüler sağlamaktır.\n` +
+  `GÜVENLİK KURALLARI:\n` +
+  `1. SADECE seçilen ülke ile ilgili soruları yanıtla. Kullanıcı herhangi bir soruda başka ülke veya genel konular hakkında soru sorsa bile, kesinlikle cevap verme. Bu durumda kibarca şunu yaz: "Üzgünüm, bu konuda bilgi veremem. Lütfen seçilen ülke hakkında soru sorunuz."\n` +
+  `2. Her soruda bu kural geçerlidir; istisna yoktur.\n` +
+  `3. Yanıtlarını kısa ve net tut; maksimum 2-3 paragraf. Gereksiz detaylardan kaçın.\n` +
+  `4. Eğer veri güncel değilse veya emin olunamıyorsa, varsayımları açıkça belirt ve gerektiğinde resmi kaynaklar veya uzman danışmanlık öner.\n` +
+  `5. Kullanıcının dili Türkçe değilse onun dilinde yanıt ver; aksi halde Türkçe yanıtla.\n` +
+  `6. Yanıtlarında profesyonel ve dostane bir ton kullan, anlaşılması kolay cümleler kur.\n` +
+  `EK ÖNERİ: Kullanıcı yanlışlıkla ülke dışında bir soru sorarsa, onu nazikçe yönlendir ve örnek sorular ver.`;
+
 
 export async function POST(request: NextRequest) {
   const client = getClient();
 
   if (!client) {
+    // Explicit and specific error to help debug.
+    console.error('AI insight error: OpenAI API key not configured.');
     return NextResponse.json(
       { error: 'OpenAI API anahtarı yapılandırılmadı.' },
-      { status: 500 }
+      { status: 503 }
     );
   }
 
@@ -186,6 +247,8 @@ export async function POST(request: NextRequest) {
 
     const contextBlock = buildContextBlock(countryName, countryCode, countryContext);
 
+    // Bypass classifier if the message or recent conversation contains a direct country mention
+
     // Guard: only respond to questions about the selected country
     const isCountryMentioned = (msg: string) => {
       if (!msg) return false;
@@ -213,14 +276,49 @@ export async function POST(request: NextRequest) {
       return false;
     };
 
-    const mentionedInTranscript = transcript.some((entry) => isCountryMentioned(entry.content));
+    // previously we used `isCountryMentioned`; use normalize-aware version
+    const mentionedInTranscript = transcript.some((entry) => isCountryMentionedInText(entry.content, countryName, countryCode));
 
-    // Run LLM based classifier to determine semantic relevance
-    const classifier = await classifyRelevance(client, message, countryName, countryCode, contextBlock);
+    // Run LLM based classifier to determine semantic relevance (but bypass if country mentioned or if message clearly belongs to allowed country-level topics).
+    let classifier;
+    // If the message touches an allowed topic AND either explicitly mentions the country
+    // or the user has selected the country, treat it as relevant. This prevents unrelated
+    // country mentions (e.g., 'BMW arabaları Türkiye') from being allowed.
+    const isTopic = isAboutAllowedCountryTopic(message) || transcript.some(e => isAboutAllowedCountryTopic(e.content));
+    if (isTopic && (mentionedInTranscript || countryName)) {
+      // Log bypass reason for monitoring
+      try {
+        fileLogActivity(
+          request.headers.get('x-user-id') || 'anonymous',
+          request.headers.get('x-user-name') || 'Anonymous',
+          request.headers.get('x-user-email') || '',
+          'ai_insight_allowed',
+          `Message allowed via bypass (country mention or allowed topic): ${message.slice(0,240)}`,
+          request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '127.0.0.1',
+          request.headers.get('user-agent') || 'Unknown',
+          'system',
+          undefined,
+          'success',
+          { reason: mentionedInTranscript ? 'country_mentioned' : 'topic_match' }
+        );
+      } catch {
+        // ignore logging errors
+      }
+
+      classifier = { relevant: true, confidence: 1, reason: 'topic_match_and_country' } as any;
+    } else {
+      try {
+        classifier = await classifyRelevance(client, message, countryName, countryCode, contextBlock);
+      } catch (err) {
+        console.warn('Classifier failed:', err instanceof Error ? err.message : String(err));
+        // Fallback to simple conservative classifier
+        classifier = { relevant: false, confidence: 0, reason: 'classification_error' };
+      }
+    }
 
     // If model says it's not relevant with high confidence, block
     if (!classifier.relevant && classifier.confidence > 0.6 && !mentionedInTranscript) {
-      const assistantReply = `Ben IREMWORLD’ün yapay zeka asistanıyım. AI Asistan yalnızca seçilen ülke ile ilgili sorulara yanıt verir. Lütfen ${countryName || 'seçilen ülke'} hakkında soru sorun.`;
+      const assistantReply = `Ben IREMWORLD’ün yapay zeka asistanıyım. Yapay Zeka yalnızca seçilen ülke ve ülkeye dair yatırım/yaşam/ekonomi/vb. konuları kapsar. Lütfen ${countryName || 'seçilen ülke'} hakkında bir soru sorunuz. Örnekler: "${countryName || 'Bu ülke'}'deki vergi sistemi nasıl?", "${countryName || 'Bu ülke'}'de nüfus ve yaşam kalitesi nasıldır?", "${countryName || 'Bu ülke'}'de yatırım için tercih edilen bölgeler nereleri?"`;
 
       // Log blocked logic
       try {
@@ -248,7 +346,13 @@ export async function POST(request: NextRequest) {
     if (classifier.confidence <= 0.6 && !mentionedInTranscript) {
       // Try embeddings similarity: see if question matches country context
       const contextText = contextBlock || `${countryName || countryCode || ''}`;
-      const sim = contextText ? await similarityFallback(client, message, contextText) : 0;
+      let sim = 0;
+      try {
+        sim = contextText ? await similarityFallback(client, message, contextText) : 0;
+      } catch (err) {
+        console.warn('Similarity fallback failed:', err instanceof Error ? err.message : String(err));
+        sim = 0;
+      }
 
       // confidence rule: if sim high (>=0.28) allow; if low and classifier unsure, block and log
       if (sim < 0.28) {
@@ -325,7 +429,9 @@ export async function POST(request: NextRequest) {
 
     const MAX_REPLY_TOKENS = 512; // Reduce token limit for faster responses (was 1024)
 
-    const completion = await client.chat.completions.create({
+    let completion;
+    try {
+      completion = await client.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
       temperature: 0.35,
@@ -333,6 +439,10 @@ export async function POST(request: NextRequest) {
     }, {
       timeout: 25000, // 25 second timeout for API call
     });
+    } catch (err) {
+      console.error('OpenAI completion error:', err instanceof Error ? err.message : String(err));
+      return NextResponse.json({ error: 'AI servisi şu anda yanıt veremiyor.' }, { status: 502 });
+    }
 
     const rawContent = completion.choices[0]?.message?.content;
     let assistantReply = extractText(rawContent);

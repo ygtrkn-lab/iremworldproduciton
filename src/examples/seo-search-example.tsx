@@ -5,6 +5,8 @@
  * similar to sahibinden.com
  */
 
+// NOTE: This example file is not referenced in app routes and may be removed.
+// If you want to keep a reference example, move it to docs/ or examples/ folder and adjust imports.
 import { Metadata } from 'next';
 import { 
   generateSearchBreadcrumbs, 
