@@ -220,10 +220,11 @@ const systemPrompt = `Sen IREMWORLD'ün yapay zeka asistanısın. Seçilen ülke
   `4. Emin olmadığın bilgiler için "genel olarak" veya "tipik olarak" ifadelerini kullan.\n` +
   `5. Kullanıcının dilinde yanıt ver.\n` +
   `İLAN ARAMA: Eğer sistem sana "İLAN ARAMA SONUÇLARI" context'i verdiyse:\n` +
-  `- Bulunan ilanları kısa özetle (max 3-4 cümle)\n` +
-  `- Her ilan için başlık, fiyat, konum ve linki listele\n` +
-  `- Link formatı: [İlan Başlığı](link)\n` +
-  `- "Toplam X ilan bulundu" bilgisini ekle\n` +
+  `- Önce "Toplam X ilan bulundu" yaz\n` +
+  `- Her ilan için numara, başlık, fiyat, konum ve link bilgilerini listele\n` +
+  `- Linkleri DÜZ METİN olarak yaz, Markdown formatı kullanma\n` +
+  `- Format: "İlan Detayları: https://iremworld.com/property/ID"\n` +
+  `- Kısa ve öz tut, gereksiz açıklama yapma\n` +
   `AMAÇ: Hızlı ve faydalı bilgi sağla.`;
 
 
