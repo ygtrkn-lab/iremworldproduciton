@@ -59,10 +59,11 @@ const menuItems: MenuItem[] = [
 ];
 
 export default function ModernNavbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false); // hide header on scroll down
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -73,11 +74,21 @@ export default function ModernNavbar() {
   }, []);
 
   useEffect(() => {
+    let lastScrollY = window.scrollY;
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const y = window.scrollY;
+      // isScrolled for small effects (bg and blur)
+      setIsScrolled(y > 20);
+      // hide header on scroll down, show on scroll up (excluding top)
+      if (y > 60 && y > lastScrollY) {
+        setIsHidden(true);
+      } else if (y < lastScrollY) {
+        setIsHidden(false);
+      }
+      lastScrollY = y;
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -116,220 +127,202 @@ export default function ModernNavbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-out ${
-        isScrolled
-          ? "bg-white/95 backdrop-blur-2xl shadow-lg shadow-gray-900/5 border-b border-gray-200/60"
-          : "bg-transparent"
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out motion-reduce:transition-none ${isHidden ? '-translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between gap-6 h-16 lg:h-20">
-          {/* Logo */}
-          <Link
-            href="/"
-            aria-label="Anasayfa"
-            className="group flex h-full w-[200px] sm:w-[240px] lg:w-[299px] items-center justify-start"
-          >
-            <div className="flex h-[3rem] sm:h-[3.25rem] lg:h-[3.5rem] w-full items-center">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 pb-4">
+        <div className="relative mt-3">
+          <div className={`relative flex items-center gap-4 sm:gap-6 rounded-[32px] border border-white/30 bg-white/80 px-4 sm:px-6 shadow-[0_20px_60px_rgba(15,23,42,0.18)] backdrop-blur-2xl transition-all duration-500 motion-reduce:transition-none ${isScrolled ? 'py-2.5' : 'py-4'}`}>
+            {/* Brand */}
+            <Link
+              href="/"
+              aria-label="Anasayfa"
+              className="relative flex items-center justify-center"
+            >
               <Image
                 src="/images/kurumsal-logo/iremworld-logo.png"
                 alt="IREMWORLD Logo"
-                width={299}
-                height={120}
+                width={80}
+                height={80}
                 priority
-                className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-[1.03]"
+                className="h-12 w-auto object-contain"
               />
-            </div>
-          </Link>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden lg:flex flex-1 items-center justify-center space-x-1">
-            {menuItems.map((item) => {
-              const hasDropdown = item.items && item.items.length > 0;
-              const itemIsActive = isActive(item.href, item.items);
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex flex-1 items-center justify-center gap-1.5">
+              {menuItems.map((item) => {
+                const hasDropdown = item.items && item.items.length > 0;
+                const itemIsActive = isActive(item.href, item.items);
 
-              if (hasDropdown) {
-                return (
-                  <div
-                    key={item.name}
-                    className="relative"
-                    onMouseEnter={() => handleMouseEnter(item.name)}
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    <button
-                      className={`flex items-center gap-1.5 px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg whitespace-nowrap ${
-                        itemIsActive
-                          ? "text-primary-600 bg-primary-50/80"
-                          : isScrolled 
-                          ? "text-gray-700 hover:text-primary-600 hover:bg-gray-50"
-                          : "text-gray-900 hover:text-primary-600 hover:bg-white/50"
-                      }`}
+                const baseClasses = `group relative flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:text-slate-900 ${itemIsActive ? 'text-slate-900' : 'text-slate-500'}`;
+
+                if (hasDropdown) {
+                  return (
+                    <div
+                      key={item.name}
+                      className="relative"
+                      onMouseEnter={() => handleMouseEnter(item.name)}
+                      onMouseLeave={handleMouseLeave}
                     >
-                      {item.name}
-                      <svg 
-                        className={`w-4 h-4 transition-transform duration-300 ${
-                          openDropdown === item.name ? 'rotate-180' : ''
-                        }`} 
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
+                      <button className={`${baseClasses} hover:bg-white/70`}> 
+                        <span>{item.name}</span>
+                        <svg
+                          className={`h-4 w-4 transition-transform duration-300 ${openDropdown === item.name ? 'rotate-180' : ''}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
 
-                    {/* Dropdown Menu */}
-                    {openDropdown === item.name && (
-                      <div className="absolute top-full left-0 mt-2 w-64 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <div className="bg-white/95 backdrop-blur-2xl rounded-2xl shadow-xl shadow-gray-900/10 border border-gray-200/60 overflow-hidden">
-                          <div className="p-2">
-                            {item.items!.map((subItem) => (
-                              <Link
-                                key={subItem.href}
-                                href={subItem.href}
-                                onClick={() => setOpenDropdown(null)}
-                                className={`block px-4 py-3 rounded-xl transition-all duration-200 ${
-                                  pathname === subItem.href
-                                    ? "bg-primary-50 text-primary-600"
-                                    : "text-gray-700 hover:bg-gray-50 hover:text-primary-600"
-                                }`}
-                              >
-                                <div className="font-medium text-sm">{subItem.name}</div>
-                                {subItem.description && (
-                                  <div className="text-xs text-gray-500 mt-0.5">{subItem.description}</div>
-                                )}
-                              </Link>
-                            ))}
+                      {openDropdown === item.name && (
+                        <div className="absolute left-1/2 top-full mt-5 w-[420px] -translate-x-1/2 animate-in fade-in slide-in-from-top-4 duration-300">
+                          <div className="rounded-3xl border border-white/40 bg-white/90 p-4 shadow-2xl backdrop-blur-2xl">
+                            <div className="flex flex-col gap-2">
+                              {item.items!.map((subItem) => (
+                                <Link
+                                  key={subItem.href}
+                                  href={subItem.href}
+                                  onClick={() => setOpenDropdown(null)}
+                                  className={`flex items-center justify-between rounded-2xl border border-transparent px-4 py-3 transition duration-200 ${
+                                    pathname === subItem.href
+                                      ? 'border-slate-200 bg-slate-50 text-slate-900'
+                                      : 'hover:border-slate-200 hover:bg-white text-slate-600'
+                                  }`}
+                                >
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold">{subItem.name}</span>
+                                    <span className="text-xs text-slate-400">{subItem.description ?? 'Detaylı bilgi alın'}</span>
+                                  </div>
+                                  <svg
+                                    className="h-4 w-4 text-slate-400"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </Link>
+                              ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href!}
+                    className={`${baseClasses} hover:bg-white/70`}
+                  >
+                    {item.name}
+                    {itemIsActive && (
+                      <span className="absolute inset-x-1 bottom-1 h-px bg-slate-900/60" />
                     )}
-                  </div>
+                  </Link>
                 );
-              }
+              })}
+            </nav>
 
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href!}
-                  className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg whitespace-nowrap ${
-                    itemIsActive
-                      ? "text-primary-600 bg-primary-50/80"
-                      : isScrolled
-                      ? "text-gray-700 hover:text-primary-600 hover:bg-gray-50"
-                      : "text-gray-900 hover:text-primary-600 hover:bg-white/50"
-                  }`}
-                >
-                  {item.name}
-                  {itemIsActive && (
-                    <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary-600 rounded-full" />
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+            {/* Right Actions */}
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={() => router.push('/for-sale')}
+                className="hidden lg:flex items-center gap-2 rounded-full border border-slate-200/60 bg-white/80 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:text-slate-900"
+              >
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                Keşfet
+              </button>
 
-          {/* Right Actions */}
-          <div className="flex w-[200px] sm:w-[240px] lg:w-[299px] items-center justify-end gap-3">
-            {/* Search Button */}
-            <button
-              onClick={() => router.push('/for-sale')}
-              className={`hidden lg:flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
-                isScrolled
-                  ? "text-gray-600 hover:text-gray-900 bg-gray-50 hover:bg-gray-100"
-                  : "text-gray-700 hover:text-gray-900 bg-white/50 hover:bg-white/80 backdrop-blur-sm"
-              }`}
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <span>Ara</span>
-            </button>
-
-            {/* User Menu */}
-            {isAuthenticated ? (
-              <div className="hidden lg:flex items-center gap-2">
+              {isAuthenticated ? (
                 <Link
                   href="/iw-management"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
+                  className="hidden lg:inline-flex items-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
                   Yönetim
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
                 </Link>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="hidden lg:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 rounded-lg transition-all duration-300 shadow-sm hover:shadow-md"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                </svg>
-                Giriş Yap
-              </Link>
-            )}
+              ) : (
+                <Link
+                  href="/login"
+                  className="hidden lg:inline-flex items-center gap-2 rounded-full bg-primary-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition hover:-translate-y-0.5 hover:bg-primary-700"
+                >
+                  Başla
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+              )}
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className={`lg:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-all duration-300 ${
-                isScrolled 
-                  ? "hover:bg-gray-100" 
-                  : "hover:bg-white/50 backdrop-blur-sm"
-              }`}
-              aria-label="Menü"
-            >
-              <div className="flex flex-col items-center justify-center w-5 h-5 gap-1">
-                <span
-                  className={`block w-5 h-0.5 transition-all duration-300 ${
-                    isScrolled ? "bg-gray-900" : "bg-gray-900"
-                  } ${isMobileMenuOpen ? "rotate-45 translate-y-1.5" : ""}`}
-                />
-                <span
-                  className={`block w-5 h-0.5 transition-all duration-300 ${
-                    isScrolled ? "bg-gray-900" : "bg-gray-900"
-                  } ${isMobileMenuOpen ? "opacity-0" : ""}`}
-                />
-                <span
-                  className={`block w-5 h-0.5 transition-all duration-300 ${
-                    isScrolled ? "bg-gray-900" : "bg-gray-900"
-                  } ${isMobileMenuOpen ? "-rotate-45 -translate-y-1.5" : ""}`}
-                />
-              </div>
-            </button>
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/50 bg-white/80 text-slate-700 transition hover:border-slate-200 lg:hidden"
+                aria-label="Menü"
+                aria-expanded={isMobileMenuOpen}
+              >
+                <div className="relative flex h-5 w-5 flex-col justify-between">
+                  <span className={`block h-0.5 w-full rounded-full bg-slate-700 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-y-2 rotate-45' : ''}`} />
+                  <span className={`block h-0.5 w-full rounded-full bg-slate-700 transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-0' : 'opacity-100'}`} />
+                  <span className={`block h-0.5 w-full rounded-full bg-slate-700 transition-transform duration-300 ${isMobileMenuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+                </div>
+              </button>
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-16 bg-white/95 backdrop-blur-2xl z-40 overflow-y-auto animate-in fade-in slide-in-from-top-4 duration-500">
-          <div className="px-4 py-6 space-y-2">
+        <div className="lg:hidden fixed inset-0 top-0 z-40 overflow-y-auto bg-white/95 px-4 py-6 shadow-2xl backdrop-blur-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+          <div className="flex items-center justify-between pb-6">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-slate-500">IREMWORLD</p>
+              <p className="text-lg font-semibold text-slate-900">Experience Hub</p>
+            </div>
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 text-slate-600"
+              aria-label="Menüyü kapat"
+            >
+              <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="flex flex-col gap-3">
             {menuItems.map((item) => {
               const hasDropdown = item.items && item.items.length > 0;
               const itemIsActive = isActive(item.href, item.items);
 
               if (hasDropdown) {
                 return (
-                  <div key={item.name} className="space-y-1">
-                    <div className="px-4 py-3 text-base font-semibold text-gray-900 bg-gray-50 rounded-lg">
-                      {item.name}
-                    </div>
-                    <div className="pl-4 space-y-1">
+                  <div key={item.name} className="rounded-3xl border border-slate-200/70 bg-white p-4">
+                    <p className="text-xs uppercase tracking-[0.4em] text-slate-400">{item.name}</p>
+                    <div className="mt-3 flex flex-col gap-2">
                       {item.items!.map((subItem) => (
                         <Link
                           key={subItem.href}
                           href={subItem.href}
                           onClick={() => setIsMobileMenuOpen(false)}
-                          className={`block px-4 py-3 text-sm font-medium rounded-lg transition-all duration-300 ${
+                          className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-medium transition ${
                             pathname === subItem.href
-                              ? "text-primary-600 bg-primary-50"
-                              : "text-gray-700 hover:bg-gray-50"
+                              ? 'border-slate-900 text-slate-900'
+                              : 'border-transparent text-slate-600 hover:border-slate-200'
                           }`}
                         >
                           {subItem.name}
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
                         </Link>
                       ))}
                     </div>
@@ -342,53 +335,55 @@ export default function ModernNavbar() {
                   key={item.href}
                   href={item.href!}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-3 text-base font-medium rounded-lg transition-all duration-300 ${
+                  className={`flex items-center justify-between rounded-3xl border px-4 py-4 text-base font-semibold transition ${
                     itemIsActive
-                      ? "text-primary-600 bg-primary-50"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? 'border-slate-900 text-slate-900'
+                      : 'border-slate-200 text-slate-600 hover:border-slate-300'
                   }`}
                 >
                   {item.name}
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </Link>
               );
             })}
 
-            {/* Mobile Actions */}
-            <div className="pt-4 mt-4 border-t border-gray-100 space-y-2">
+            <div className="mt-6 space-y-3">
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
                   router.push('/for-sale');
                 }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                className="flex w-full items-center justify-between rounded-3xl border border-slate-900/10 bg-slate-900/5 px-4 py-4 text-sm font-semibold text-slate-700"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                İlan Ara
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
-                İlan Ara
               </button>
 
               {isAuthenticated ? (
                 <Link
                   href="/iw-management"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-lg"
+                  className="flex w-full items-center justify-between rounded-3xl bg-slate-900 px-5 py-4 text-sm font-semibold text-white"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
                   Yönetim Paneli
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
                 </Link>
               ) : (
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-base font-medium text-white bg-gradient-to-r from-primary-600 to-primary-500 rounded-lg"
+                  className="flex w-full items-center justify-between rounded-3xl bg-gradient-to-r from-primary-600 via-purple-500 to-blue-500 px-5 py-4 text-sm font-semibold text-white"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
                   Giriş Yap
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
                 </Link>
               )}
             </div>

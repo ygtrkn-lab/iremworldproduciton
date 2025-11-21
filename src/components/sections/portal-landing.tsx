@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef, useMemo, useLayoutEffect, FormEvent } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { gsap } from 'gsap';
+// gsap will be dynamically imported to avoid bundling into initial client JS
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import ReactCountryFlag from 'react-country-flag';
 // @ts-ignore - world-countries type definitions may not be available
-import countries from 'world-countries';
+// world-countries will be dynamically imported to reduce initial bundle size
 import AboutUsPopup from './about-us-popup';
 import consultantsData from '@/data/consultants.json';
 import LanguageSelector from '@/components/ui/language-selector';
@@ -56,30 +56,34 @@ const getRandomBackgroundIndex = (excludeIndex?: number) => {
   return candidate;
 };
 
+// Lazy GSAP loader to avoid bundling it into the initial JS payload
+let _gsapModule: any = null;
+const getGsap = async () => {
+  if (!_gsapModule) {
+    const mod = await import('gsap');
+    _gsapModule = (mod as any).gsap || (mod as any).default || mod;
+  }
+  return _gsapModule;
+};
+
 // Ülkeleri formatla
-const formattedCountries = countries.map((country: any) => {
-  const nativeNameObj: any = country.name.native ? Object.values(country.name.native)[0] : null;
-  
-  return {
-    code: country.cca2,
-    name: country.name.common,
-    nativeName: nativeNameObj?.common || country.name.common,
-  };
-}).sort((a: any, b: any) => a.name.localeCompare(b.name));
+// `formattedCountries` is now loaded dynamically at runtime (client-only)
 
 // Ülke seçici komponenti
 const CountrySelector = ({
   selectedCountry,
   onSelect,
+  options,
 }: {
-  selectedCountry: typeof formattedCountries[0] | null;
-  onSelect: (country: typeof formattedCountries[0]) => void;
+  options: Array<{code: string; name: string; nativeName?: string}>;
+  selectedCountry: {code: string; name: string; nativeName?: string} | null;
+  onSelect: (country: {code: string; name: string; nativeName?: string}) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const filteredCountries = formattedCountries.filter(country =>
+  const filteredCountries = options.filter(country =>
     country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     country.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
     (country.nativeName && country.nativeName.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -444,9 +448,9 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
   const [selectedShopCategory, setSelectedShopCategory] = useState('government');
   const [selectedSubCategory, setSelectedSubCategory] = useState('');
   const [selectedTransactionType, setSelectedTransactionType] = useState<'sale' | 'rent'>('sale');
-  const [selectedCountry, setSelectedCountry] = useState<typeof formattedCountries[0] | null>(
-    formattedCountries.find(c => c.code === 'TR') || formattedCountries[0]
-  );
+  // Load formatted country list dynamically to reduce initial bundle size
+  const [formattedCountries, setFormattedCountries] = useState<Array<{code: string; name: string; nativeName?: string}>>([]);
+  const [selectedCountry, setSelectedCountry] = useState<{code: string; name: string; nativeName?: string} | null>(null);
   const [selectedConsultantType, setSelectedConsultantType] = useState(consultantTypes[0].id);
   const [isAboutUsOpen, setIsAboutUsOpen] = useState(false);
   const selectedConsultant = useMemo(
@@ -467,6 +471,39 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
     [consultantCountryMap]
   );
   const { user } = useAuth();
+
+  // Dynamically load 'world-countries' on client to avoid bundling it into the initial JS.
+  
+  useEffect(() => {
+    let mounted = true;
+    const loadCountries = async () => {
+      try {
+        const module = await import('world-countries');
+        if (!mounted) return;
+        const list = (module.default || module) as any[];
+        const ff = list.map((country: any) => {
+          const nativeNameObj: any = country.name?.native ? Object.values(country.name.native)[0] : null;
+          return {
+            code: country.cca2,
+            name: country.name?.common || country.name,
+            nativeName: nativeNameObj?.common || country.name?.common,
+          };
+        }).sort((a: any, b: any) => a.name.localeCompare(b.name));
+        setFormattedCountries(ff);
+        setCountriesData(list);
+        // set default selected country if not already set
+        if (!selectedCountry && ff.length) {
+          const autoplayDefault = ff.find(c => c.code === 'TR') ?? ff[0];
+          setSelectedCountry(autoplayDefault as any);
+        }
+      } catch (e) {
+        console.warn('Failed to load countries list', e);
+      }
+    };
+    loadCountries();
+    return () => { mounted = false; };
+  }, []);
+  const [countriesData, setCountriesData] = useState<any[]>([]);
 
   // AI Chat messages - load from localStorage on mount
   const [insightMessages, setInsightMessages] = useState<InsightMessage[]>(() => {
@@ -615,7 +652,7 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
     }
 
     return (
-      countries.find((country: any) => country.cca2 === selectedCountry.code) || null
+      countriesData.find((country: any) => country.cca2 === selectedCountry.code) || null
     );
   }, [selectedCountry]) as any;
 
@@ -750,166 +787,91 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    // Her kartın başlangıçta görünür olduğundan emin olalım
-    gsap.set([shopCard, consultantCard, insightCard], { 
-      opacity: 1, 
-      y: 0, 
-      rotate: 0,
-      scale: 1,
-      clearProps: 'all'
+    // Kartları HEMEN görünür yap - animasyon beklemeden
+    shopCard.style.opacity = '1';
+    consultantCard.style.opacity = '1';
+    insightCard.style.opacity = '1';
+
+    // İkonlar ve badge'leri de HEMEN görünür yap
+    const allCards = [shopCard, consultantCard, insightCard];
+    allCards.forEach(card => {
+      const icon = card.querySelector('.portal-card-icon') as HTMLElement;
+      const badges = card.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
+      
+      if (icon) {
+        icon.style.opacity = '1';
+        icon.style.transform = 'scale(1) rotate(0deg)';
+      }
+      
+      badges.forEach(badge => {
+        badge.style.opacity = '1';
+        badge.style.transform = 'translateY(0) scale(1)';
+      });
     });
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+    // Animasyonları arka planda yükle (opsiyonel)
+    let mounted = true;
+    let ctx: any = null;
+    
+    (async () => {
+      try {
+        const module = await import('gsap');
+        const _gsap = (module as any).gsap || (module as any).default || module;
+        if (!mounted) return;
 
-      // Premium paralax efekti ile kartları sırayla göster
-      tl.fromTo(
-        shopCard,
-        { 
-          y: 100, 
-          opacity: 0, 
-          scale: 0.85,
-          rotateX: 25,
-          transformPerspective: 1000,
-          boxShadow: '0px 0px 0px rgba(0,0,0,0)'
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1,
-          rotateX: isCoarsePointer ? 0 : 8,
-          rotateY: isCoarsePointer ? 0 : 15,
-          z: 0,
-          duration: isCoarsePointer ? 0.9 : 1.2,
-          boxShadow: '-15px 25px 70px -35px rgba(17, 24, 39, 0.3)',
-          ease: 'expo.out'
-        },
-        0.1
-      )
-      .fromTo(
-        shopCard.querySelector('.portal-card-icon'),
-        { scale: 0, rotate: -180 },
-        { scale: 1, rotate: 0, duration: 0.8, ease: 'back.out(1.7)' },
-        0.4
-      )
-      .fromTo(
-        consultantCard,
-        { 
-          y: 100, 
-          opacity: 0, 
-          scale: 0.85,
-          rotateX: 25,
-          transformPerspective: 1000,
-          boxShadow: '0px 0px 0px rgba(0,0,0,0)'
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1,
-          rotateX: isCoarsePointer ? 0 : 8,
-          rotateY: 0,
-          z: isCoarsePointer ? 0 : 30,
-          duration: isCoarsePointer ? 0.9 : 1.2,
-          boxShadow: '0px 40px 100px -25px rgba(17, 24, 39, 0.4)',
-          ease: 'expo.out'
-        },
-        0.25
-      )
-      .fromTo(
-        consultantCard.querySelector('.portal-card-icon'),
-        { scale: 0, rotate: 180 },
-        { scale: 1, rotate: 0, duration: 0.8, ease: 'back.out(1.7)' },
-        0.55
-      )
-      .fromTo(
-        insightCard,
-        { 
-          y: 100, 
-          opacity: 0, 
-          scale: 0.85,
-          rotateX: 25,
-          transformPerspective: 1000,
-          boxShadow: '0px 0px 0px rgba(0,0,0,0)'
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1,
-          rotateX: isCoarsePointer ? 0 : 8,
-          rotateY: isCoarsePointer ? 0 : -15,
-          z: 0,
-          duration: isCoarsePointer ? 0.9 : 1.2,
-          boxShadow: '15px 25px 70px -35px rgba(17, 24, 39, 0.3)',
-          ease: 'expo.out'
-        },
-        0.4
-      )
-      .fromTo(
-        insightCard.querySelector('.portal-card-icon'),
-        { scale: 0, rotate: -180 },
-        { scale: 1, rotate: 0, duration: 0.8, ease: 'back.out(1.7)' },
-        0.7
-      )
-      
-      // Badge'leri dalga efektiyle göster
-      const allBadges = [
-        ...shopCard.querySelectorAll('.portal-card-badge'),
-        ...consultantCard.querySelectorAll('.portal-card-badge'),
-        ...insightCard.querySelectorAll('.portal-card-badge')
-      ];
-      
-      tl.fromTo(
-        allBadges,
-        { 
-          y: 20, 
-          opacity: 0, 
-          scale: 0.8,
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1,
-          duration: 0.6,
-          ease: 'back.out(1.5)',
-          stagger: { 
-            each: 0.04,
-            from: 'start'
-          }
-        },
-        0.8
-      )
-      
-      // CTA'ları pulse efektiyle göster
-      .fromTo(
-        [shopCtaRef.current, consultantCtaRef.current, insightCtaRef.current],
-        { 
-          opacity: 0, 
-          scale: 0.9,
-          x: -20
-        },
-        { 
-          opacity: 1, 
-          scale: 1,
-          x: 0,
-          duration: 0.7,
-          ease: 'power3.out',
-          stagger: 0.1
-        },
-        1.0
-      );
-    }, portalRoot);
+        ctx = _gsap.context(() => {
+          const tl = _gsap.timeline({ defaults: { ease: 'power4.out' } });
+
+          // Sadece hafif giriş animasyonu - içerik zaten görünür
+          tl.fromTo(
+            shopCard,
+            { y: 20, scale: 0.98 },
+            { 
+              y: 0, 
+              scale: 1,
+              rotateX: isCoarsePointer ? 0 : 8,
+              rotateY: isCoarsePointer ? 0 : 15,
+              duration: 0.6,
+              ease: 'power2.out'
+            },
+            0
+          )
+          .fromTo(
+            consultantCard,
+            { y: 20, scale: 0.98 },
+            { 
+              y: 0, 
+              scale: 1,
+              rotateX: isCoarsePointer ? 0 : 8,
+              rotateY: 0,
+              z: isCoarsePointer ? 0 : 30,
+              duration: 0.6,
+              ease: 'power2.out'
+            },
+            0.1
+          )
+          .fromTo(
+            insightCard,
+            { y: 20, scale: 0.98 },
+            { 
+              y: 0, 
+              scale: 1,
+              rotateX: isCoarsePointer ? 0 : 8,
+              rotateY: isCoarsePointer ? 0 : -15,
+              duration: 0.6,
+              ease: 'power2.out'
+            },
+            0.2
+          );
+        }, portalRoot);
+      } catch (err) {
+        console.warn('GSAP animation init failed', err);
+      }
+    })();
 
     return () => {
-      // Cleanup yaparken kartların görünür kalmasını sağla
-      ctx.revert();
-      if (shopCard && consultantCard && insightCard) {
-        gsap.set([shopCard, consultantCard, insightCard], { 
-          opacity: 1, 
-          y: 0, 
-          rotate: 0,
-          clearProps: 'transform'
-        });
-      }
+      mounted = false;
+      if (ctx) ctx.revert();
     };
   }, [activePanel, isCoarsePointer]);
 
@@ -918,69 +880,79 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.55 } });
+    let ctx: any = null;
+    (async () => {
+      try {
+        const gsap = await getGsap();
+        ctx = gsap.context(() => {
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.55 } });
 
-      tl.from('[data-anim="shop-heading"]', {
-        y: 36,
-        opacity: 0,
-      })
-        .from(
-          '[data-anim="shop-toggle"] .shop-toggle-item',
-          {
+          tl.from('[data-anim="shop-heading"]', {
+            y: 36,
             opacity: 0,
-            y: 26,
-            duration: 0.45,
-            ease: 'back.out(1.4)',
-            stagger: { each: 0.08, from: 'center' },
-          },
-          '-=0.32'
-        )
-        .from(
-          '[data-anim="shop-country"]',
-          {
-            y: 24,
-            opacity: 0,
-            duration: 0.5,
-          },
-          '-=0.32'
-        )
-        .from(
-          '[data-anim="shop-categories"] .shop-category-item',
-          {
-            y: 22,
-            opacity: 0,
-            duration: 0.45,
-            ease: 'back.out(1.6)',
-            stagger: { each: 0.05, from: 'center' },
-          },
-          '-=0.28'
-        )
-        .from(
-          '[data-anim="shop-intents"] .shop-intent-item',
-          {
-            y: 20,
-            opacity: 0,
-            duration: 0.45,
-            ease: 'back.out(1.6)',
-            stagger: { each: 0.06, from: 'edges' },
-          },
-          '-=0.3'
-        )
-        .from(
-          '[data-anim="shop-cta"]',
-          {
-            opacity: 0,
-            y: 18,
-            scale: 0.96,
-            duration: 0.4,
-            stagger: 0.1,
-          },
-          '-=0.25'
-        );
-    }, shopPanelRef);
+          })
+            .from(
+              '[data-anim="shop-toggle"] .shop-toggle-item',
+              {
+                opacity: 0,
+                y: 26,
+                duration: 0.45,
+                ease: 'back.out(1.4)',
+                stagger: { each: 0.08, from: 'center' },
+              },
+              '-=0.32'
+            )
+            .from(
+              '[data-anim="shop-country"]',
+              {
+                y: 24,
+                opacity: 0,
+                duration: 0.5,
+              },
+              '-=0.32'
+            )
+            .from(
+              '[data-anim="shop-categories"] .shop-category-item',
+              {
+                y: 22,
+                opacity: 0,
+                duration: 0.45,
+                ease: 'back.out(1.6)',
+                stagger: { each: 0.05, from: 'center' },
+              },
+              '-=0.28'
+            )
+            .from(
+              '[data-anim="shop-intents"] .shop-intent-item',
+              {
+                y: 20,
+                opacity: 0,
+                duration: 0.45,
+                ease: 'back.out(1.6)',
+                stagger: { each: 0.06, from: 'edges' },
+              },
+              '-=0.3'
+            )
+            .from(
+              '[data-anim="shop-cta"]',
+              {
+                opacity: 0,
+                y: 18,
+                scale: 0.96,
+                duration: 0.4,
+                stagger: 0.1,
+              },
+              '-=0.25'
+            );
+        }, shopPanelRef);
+      } catch (err) {
+        console.warn('Shop panel animation init failed', err);
+      }
+    })();
 
-    return () => ctx.revert();
+    return () => {
+      ctx?.revert?.();
+    };
   }, [activePanel]);
 
   useEffect(() => {
@@ -988,56 +960,66 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.55 } });
+    let ctx: any = null;
+    (async () => {
+      try {
+        const gsap = await getGsap();
+        ctx = gsap.context(() => {
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.55 } });
 
-      tl.from('[data-anim="consultant-heading"]', {
-        y: 34,
-        opacity: 0,
-      })
-        .from(
-          '[data-anim="consultant-country"]',
-          {
-            y: 24,
+          tl.from('[data-anim="consultant-heading"]', {
+            y: 34,
             opacity: 0,
-            duration: 0.5,
-          },
-          '-=0.3'
-        )
-        .from(
-          '[data-anim="consultant-grid"] .consultant-type-item',
-          {
-            y: 22,
-            opacity: 0,
-            duration: 0.5,
-            ease: 'back.out(1.7)',
-            stagger: { each: 0.06, from: 'center' },
-          },
-          '-=0.25'
-        )
-        .from(
-          '[data-anim="consultant-detail"]',
-          {
-            y: 20,
-            opacity: 0,
-            duration: 0.45,
-          },
-          '-=0.24'
-        )
-        .from(
-          '[data-anim="consultant-cta"]',
-          {
-            opacity: 0,
-            y: 18,
-            scale: 0.95,
-            duration: 0.4,
-            stagger: 0.12,
-          },
-          '-=0.22'
-        );
-    }, consultantPanelRef);
+          })
+            .from(
+              '[data-anim="consultant-country"]',
+              {
+                y: 24,
+                opacity: 0,
+                duration: 0.5,
+              },
+              '-=0.3'
+            )
+            .from(
+              '[data-anim="consultant-grid"] .consultant-type-item',
+              {
+                y: 22,
+                opacity: 0,
+                duration: 0.5,
+                ease: 'back.out(1.7)',
+                stagger: { each: 0.06, from: 'center' },
+              },
+              '-=0.25'
+            )
+            .from(
+              '[data-anim="consultant-detail"]',
+              {
+                y: 20,
+                opacity: 0,
+                duration: 0.45,
+              },
+              '-=0.24'
+            )
+            .from(
+              '[data-anim="consultant-cta"]',
+              {
+                opacity: 0,
+                y: 18,
+                scale: 0.95,
+                duration: 0.4,
+                stagger: 0.12,
+              },
+              '-=0.22'
+            );
+        }, consultantPanelRef);
+      } catch (err) {
+        console.warn('Consultant panel animation init failed', err);
+      }
+    })();
 
-    return () => ctx.revert();
+    return () => {
+      ctx?.revert?.();
+    };
   }, [activePanel]);
 
   useEffect(() => {
@@ -1045,55 +1027,65 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.55 } });
+    let ctx: any = null;
+    (async () => {
+      try {
+        const gsap = await getGsap();
+        ctx = gsap.context(() => {
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.55 } });
 
-      tl.from('[data-anim="insight-heading"]', {
-        y: 34,
-        opacity: 0,
-      })
-        .from(
-          '[data-anim="insight-selector"]',
-          {
-            y: 24,
+          tl.from('[data-anim="insight-heading"]', {
+            y: 34,
             opacity: 0,
-            duration: 0.45,
-          },
-          '-=0.28'
-        )
-        .from(
-          '[data-anim="insight-stats"] .insight-stat-card',
-          {
-            y: 28,
-            opacity: 0,
-            duration: 0.45,
-            ease: 'back.out(1.6)',
-            stagger: { each: 0.08, from: 'center' },
-          },
-          '-=0.3'
-        )
-        .from(
-          '[data-anim="insight-highlight"]',
-          {
-            y: 24,
-            opacity: 0,
-            duration: 0.45,
-          },
-          '-=0.26'
-        )
-        .from(
-          '[data-anim="insight-cta"]',
-          {
-            opacity: 0,
-            y: 18,
-            scale: 0.96,
-            duration: 0.4,
-          },
-          '-=0.2'
-        );
-    }, insightPanelRef);
+          })
+            .from(
+              '[data-anim="insight-selector"]',
+              {
+                y: 24,
+                opacity: 0,
+                duration: 0.45,
+              },
+              '-=0.28'
+            )
+            .from(
+              '[data-anim="insight-stats"] .insight-stat-card',
+              {
+                y: 28,
+                opacity: 0,
+                duration: 0.45,
+                ease: 'back.out(1.6)',
+                stagger: { each: 0.08, from: 'center' },
+              },
+              '-=0.3'
+            )
+            .from(
+              '[data-anim="insight-highlight"]',
+              {
+                y: 24,
+                opacity: 0,
+                duration: 0.45,
+              },
+              '-=0.26'
+            )
+            .from(
+              '[data-anim="insight-cta"]',
+              {
+                opacity: 0,
+                y: 18,
+                scale: 0.96,
+                duration: 0.4,
+              },
+              '-=0.2'
+            );
+        }, insightPanelRef);
+      } catch (err) {
+        console.warn('Insight panel animation init failed', err);
+      }
+    })();
 
-    return () => ctx.revert();
+    return () => {
+      ctx?.revert?.();
+    };
   }, [activePanel, selectedCountry]);
 
   useEffect(() => {
@@ -1154,272 +1146,286 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    // Throttle helper - performans için hover event'leri azalt
-    let rafId: number | null = null;
-    const throttledHover = (callback: () => void) => {
-      if (rafId !== null) return;
-      rafId = requestAnimationFrame(() => {
-        callback();
-        rafId = null;
-      });
-    };
+    let mounted = true;
 
-    const tiltConfigs: Array<{
-      card: HTMLDivElement;
-      base: { rotationX: number; rotationY: number };
-    }> = [];
+    (async () => {
+      try {
+        const gsap = await getGsap();
+        if (!mounted) return;
 
-    // Sol kart (Shop) - mobilde 3D kapalı
-    if (shopCardRef.current) {
-      tiltConfigs.push({ card: shopCardRef.current, base: { rotationX: isCoarsePointer ? 0 : 8, rotationY: isCoarsePointer ? 0 : 15 } });
-    }
+        // Throttle helper - performans için hover event'leri azalt
+        let rafId: number | null = null;
+        const throttledHover = (callback: () => void) => {
+          if (rafId !== null) return;
+          rafId = requestAnimationFrame(() => {
+            callback();
+            rafId = null;
+          });
+        };
 
-    // Orta kart (Consultant) - diğer kartlarla aynı seviyede geriye yatık, öne doğru çıkıyor
-    if (consultantCardRef.current) {
-      gsap.set(consultantCardRef.current, {
-        transformPerspective: 1200,
-        transformStyle: 'preserve-3d',
-        transformOrigin: 'center',
-        rotationX: isCoarsePointer ? 0 : 8,
-        rotationY: 0,
-        z: isCoarsePointer ? 0 : 30,
-      });
-    }
+        const tiltConfigs: Array<{
+          card: HTMLDivElement;
+          base: { rotationX: number; rotationY: number };
+        }> = [];
 
-    // Sağ kart (Insight) - mobilde 3D kapalı
-    if (insightCardRef.current) {
-      tiltConfigs.push({ card: insightCardRef.current, base: { rotationX: isCoarsePointer ? 0 : 8, rotationY: isCoarsePointer ? 0 : -15 } });
-    }
+        // Sol kart (Shop) - mobilde 3D kapalı
+        if (shopCardRef.current) {
+          tiltConfigs.push({ card: shopCardRef.current, base: { rotationX: isCoarsePointer ? 0 : 8, rotationY: isCoarsePointer ? 0 : 15 } });
+        }
 
-    // Orta kart için özel mouse handler (mobilde performans için kapalı)
-    // Sadece desktop'ta aktif (pointer: fine ve min-width: 1024px)
-    const isDesktop = !isCoarsePointer && typeof window !== 'undefined' && window.innerWidth >= 1024;
-    if (consultantCardRef.current && isDesktop) {
-      const consultantCard = consultantCardRef.current;
-      
-      gsap.set(consultantCard, {
-        transformPerspective: 1200,
-        transformStyle: 'preserve-3d',
-        transformOrigin: 'center',
-        force3D: true, // GPU acceleration
-      });
-      
-      const handleConsultantMove = (event: MouseEvent) => {
-        throttledHover(() => {
-          const rect = consultantCard.getBoundingClientRect();
-          const offsetX = event.clientX - rect.left;
-          const offsetY = event.clientY - rect.top;
+        // Orta kart (Consultant) - diğer kartlarla aynı seviyede geriye yatık, öne doğru çıkıyor
+        if (consultantCardRef.current) {
+          gsap.set(consultantCardRef.current, {
+            transformPerspective: 1200,
+            transformStyle: 'preserve-3d',
+            transformOrigin: 'center',
+            rotationX: isCoarsePointer ? 0 : 8,
+            rotationY: 0,
+            z: isCoarsePointer ? 0 : 30,
+          });
+        }
+
+        // Sağ kart (Insight) - mobilde 3D kapalı
+        if (insightCardRef.current) {
+          tiltConfigs.push({ card: insightCardRef.current, base: { rotationX: isCoarsePointer ? 0 : 8, rotationY: isCoarsePointer ? 0 : -15 } });
+        }
+
+        // Orta kart için özel mouse handler (mobilde performans için kapalı)
+        // Sadece desktop'ta aktif (pointer: fine ve min-width: 1024px)
+        const isDesktop = !isCoarsePointer && typeof window !== 'undefined' && window.innerWidth >= 1024;
+        if (consultantCardRef.current && isDesktop) {
+          const consultantCard = consultantCardRef.current;
           
-          // Orta kart için daha subtle hareket
-          const tiltY = ((offsetX / rect.width) - 0.5) * 18;
-          const tiltX = ((offsetY / rect.height) - 0.5) * -12;
-          
-          const icon = consultantCard.querySelector('.portal-card-icon') as HTMLElement;
-          const badges = consultantCard.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
-          
-          gsap.to(consultantCard, {
-            rotationY: tiltY,
-            rotationX: 8 + tiltX,
-            z: 35,
-            duration: 0.4, // Daha hızlı
-            ease: 'power2.out',
-            boxShadow: `${tiltY}px ${tiltX + 15}px 90px -20px rgba(240,127,56,0.45)`,
-            force3D: true,
+          gsap.set(consultantCard, {
+            transformPerspective: 1200,
+            transformStyle: 'preserve-3d',
+            transformOrigin: 'center',
+            force3D: true, // GPU acceleration
           });
           
-          if (icon) {
-            gsap.to(icon, {
-              x: -tiltY * 0.4,
-              y: -tiltX * 0.4,
-              duration: 0.4,
+          const handleConsultantMove = (event: MouseEvent) => {
+            throttledHover(() => {
+              const rect = consultantCard.getBoundingClientRect();
+              const offsetX = event.clientX - rect.left;
+              const offsetY = event.clientY - rect.top;
+              
+              // Orta kart için daha subtle hareket
+              const tiltY = ((offsetX / rect.width) - 0.5) * 18;
+              const tiltX = ((offsetY / rect.height) - 0.5) * -12;
+              
+              const icon = consultantCard.querySelector('.portal-card-icon') as HTMLElement;
+              const badges = consultantCard.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
+              
+              gsap.to(consultantCard, {
+                rotationY: tiltY,
+                rotationX: 8 + tiltX,
+                z: 35,
+                duration: 0.4, // Daha hızlı
+                ease: 'power2.out',
+                boxShadow: `${tiltY}px ${tiltX + 15}px 90px -20px rgba(240,127,56,0.45)`,
+                force3D: true,
+              });
+              
+              if (icon) {
+                gsap.to(icon, {
+                  x: -tiltY * 0.4,
+                  y: -tiltX * 0.4,
+                  duration: 0.4,
+                  ease: 'power2.out',
+                  force3D: true,
+                });
+              }
+              
+              if (badges.length) {
+                badges.forEach((badge, index) => {
+                  gsap.to(badge, {
+                    x: -tiltY * (0.25 + index * 0.08),
+                    y: -tiltX * (0.25 + index * 0.08),
+                    duration: 0.4,
+                    ease: 'power2.out',
+                    force3D: true,
+                  });
+                });
+              }
+            });
+          };
+          
+          const handleConsultantLeave = () => {
+            const icon = consultantCard.querySelector('.portal-card-icon') as HTMLElement;
+            const badges = consultantCard.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
+            
+            gsap.to(consultantCard, {
+              rotationY: 0,
+              rotationX: 8,
+              z: 30,
+              duration: 0.6, // Daha hızlı
               ease: 'power2.out',
+              boxShadow: '0px 40px 100px -25px rgba(17, 24, 39, 0.4)',
               force3D: true,
             });
-          }
-          
-          if (badges.length) {
-            badges.forEach((badge, index) => {
-              gsap.to(badge, {
-                x: -tiltY * (0.25 + index * 0.08),
-                y: -tiltX * (0.25 + index * 0.08),
-                duration: 0.4,
+            
+            if (icon) {
+              gsap.to(icon, {
+                x: 0,
+                y: 0,
+                duration: 0.6,
                 ease: 'power2.out',
                 force3D: true,
               });
-            });
-          }
-        });
-      };
-      
-      const handleConsultantLeave = () => {
-        const icon = consultantCard.querySelector('.portal-card-icon') as HTMLElement;
-        const badges = consultantCard.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
-        
-        gsap.to(consultantCard, {
-          rotationY: 0,
-          rotationX: 8,
-          z: 30,
-          duration: 0.6, // Daha hızlı
-          ease: 'power2.out',
-          boxShadow: '0px 40px 100px -25px rgba(17, 24, 39, 0.4)',
-          force3D: true,
-        });
-        
-        if (icon) {
-          gsap.to(icon, {
-            x: 0,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            force3D: true,
+            }
+            
+            if (badges.length) {
+              gsap.to(badges, {
+                x: 0,
+                y: 0,
+                duration: 0.6,
+                ease: 'power2.out',
+                force3D: true,
+              });
+            }
+          };
+          
+          consultantCard.addEventListener('mousemove', handleConsultantMove);
+          consultantCard.addEventListener('mouseleave', handleConsultantLeave);
+          consultantCard.addEventListener('mouseenter', handleConsultantMove);
+          
+          cardTiltCleanupRef.current.push(() => {
+            consultantCard.removeEventListener('mousemove', handleConsultantMove);
+            consultantCard.removeEventListener('mouseleave', handleConsultantLeave);
+            consultantCard.removeEventListener('mouseenter', handleConsultantMove);
           });
         }
-        
-        if (badges.length) {
-          gsap.to(badges, {
-            x: 0,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            force3D: true,
-          });
-        }
-      };
-      
-      consultantCard.addEventListener('mousemove', handleConsultantMove);
-      consultantCard.addEventListener('mouseleave', handleConsultantLeave);
-      consultantCard.addEventListener('mouseenter', handleConsultantMove);
-      
-      cardTiltCleanupRef.current.push(() => {
-        consultantCard.removeEventListener('mousemove', handleConsultantMove);
-        consultantCard.removeEventListener('mouseleave', handleConsultantLeave);
-        consultantCard.removeEventListener('mouseenter', handleConsultantMove);
-      });
-    }
 
-    tiltConfigs.forEach(({ card, base }) => {
-      // Mobil ve tablet cihazlarda 3D animasyonları kapat - performans için
-      const isDesktop = !isCoarsePointer && typeof window !== 'undefined' && window.innerWidth >= 1024;
-      if (!isDesktop) {
-        return; // Mobilde hiç 3D animasyon yapma
+        tiltConfigs.forEach(({ card, base }) => {
+          // Mobil ve tablet cihazlarda 3D animasyonları kapat - performans için
+          const isDesktop = !isCoarsePointer && typeof window !== 'undefined' && window.innerWidth >= 1024;
+          if (!isDesktop) {
+            return; // Mobilde hiç 3D animasyon yapma
+          }
+
+          gsap.set(card, {
+            transformPerspective: 1200,
+            transformStyle: 'preserve-3d',
+            transformOrigin: 'center',
+            rotationX: base.rotationX,
+            rotationY: base.rotationY,
+            z: 0,
+            force3D: true, // GPU acceleration
+          });
+
+          const handleMove = (event: MouseEvent) => {
+            throttledHover(() => {
+              const rect = card.getBoundingClientRect();
+              const offsetX = event.clientX - rect.left;
+              const offsetY = event.clientY - rect.top;
+              
+              // Daha belirgin 3D tilt efekti
+              const tiltY = ((offsetX / rect.width) - 0.5) * 20;
+              const tiltX = ((offsetY / rect.height) - 0.5) * -15;
+              
+              // Paralax efekti için içerik elementlerini hareket ettir
+              const icon = card.querySelector('.portal-card-icon') as HTMLElement;
+              const badges = card.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
+              
+              gsap.to(card, {
+                rotationY: base.rotationY + tiltY,
+                rotationX: base.rotationX + tiltX,
+                duration: 0.4, // Daha hızlı
+                ease: 'power2.out',
+                boxShadow: `${tiltY * 2}px ${tiltX * 2}px 80px -20px rgba(240,127,56,0.4)`,
+                force3D: true,
+              });
+              
+              // İçerik elementlerine ters yönde hafif hareket (paralax)
+              if (icon) {
+                gsap.to(icon, {
+                  x: -tiltY * 0.5,
+                  y: -tiltX * 0.5,
+                  duration: 0.4,
+                  ease: 'power2.out',
+                  force3D: true,
+                });
+              }
+              
+              if (badges.length) {
+                badges.forEach((badge, index) => {
+                  gsap.to(badge, {
+                    x: -tiltY * (0.3 + index * 0.1),
+                    y: -tiltX * (0.3 + index * 0.1),
+                    duration: 0.4,
+                    ease: 'power2.out',
+                    force3D: true,
+                  });
+                });
+              }
+            });
+          };
+
+          const handleLeave = () => {
+            const icon = card.querySelector('.portal-card-icon') as HTMLElement;
+            const badges = card.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
+            
+            gsap.to(card, {
+              rotationY: base.rotationY,
+              rotationX: base.rotationX,
+              duration: 0.6, // Daha hızlı
+              ease: 'power2.out',
+              boxShadow: '0px 22px 60px -40px rgba(17, 24, 39, 0.25)',
+              force3D: true,
+            });
+            
+            // İçerikleri de orijinal konumlarına döndür
+            if (icon) {
+              gsap.to(icon, {
+                x: 0,
+                y: 0,
+                duration: 0.6,
+                ease: 'power2.out',
+                force3D: true,
+              });
+            }
+            
+            if (badges.length) {
+              gsap.to(badges, {
+                x: 0,
+                y: 0,
+                duration: 0.6,
+                ease: 'power2.out',
+                force3D: true,
+              });
+            }
+          };
+
+          card.addEventListener('mousemove', handleMove);
+          card.addEventListener('mouseleave', handleLeave);
+          card.addEventListener('mouseenter', handleMove);
+
+          cardTiltCleanupRef.current.push(() => {
+            card.removeEventListener('mousemove', handleMove);
+            card.removeEventListener('mouseleave', handleLeave);
+            card.removeEventListener('mouseenter', handleMove);
+          });
+        });
+      } catch (err) {
+        console.warn('Card tilt animation failed', err);
       }
-
-      gsap.set(card, {
-        transformPerspective: 1200,
-        transformStyle: 'preserve-3d',
-        transformOrigin: 'center',
-        rotationX: base.rotationX,
-        rotationY: base.rotationY,
-        z: 0,
-        force3D: true, // GPU acceleration
-      });
-
-      const handleMove = (event: MouseEvent) => {
-        throttledHover(() => {
-          const rect = card.getBoundingClientRect();
-          const offsetX = event.clientX - rect.left;
-          const offsetY = event.clientY - rect.top;
-          
-          // Daha belirgin 3D tilt efekti
-          const tiltY = ((offsetX / rect.width) - 0.5) * 20;
-          const tiltX = ((offsetY / rect.height) - 0.5) * -15;
-          
-          // Paralax efekti için içerik elementlerini hareket ettir
-          const icon = card.querySelector('.portal-card-icon') as HTMLElement;
-          const badges = card.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
-          
-          gsap.to(card, {
-            rotationY: base.rotationY + tiltY,
-            rotationX: base.rotationX + tiltX,
-            duration: 0.4, // Daha hızlı
-            ease: 'power2.out',
-            boxShadow: `${tiltY * 2}px ${tiltX * 2}px 80px -20px rgba(240,127,56,0.4)`,
-            force3D: true,
-          });
-          
-          // İçerik elementlerine ters yönde hafif hareket (paralax)
-          if (icon) {
-            gsap.to(icon, {
-              x: -tiltY * 0.5,
-              y: -tiltX * 0.5,
-              duration: 0.4,
-              ease: 'power2.out',
-              force3D: true,
-            });
-          }
-          
-          if (badges.length) {
-            badges.forEach((badge, index) => {
-              gsap.to(badge, {
-                x: -tiltY * (0.3 + index * 0.1),
-                y: -tiltX * (0.3 + index * 0.1),
-                duration: 0.4,
-                ease: 'power2.out',
-                force3D: true,
-              });
-            });
-          }
-        });
-      };
-
-      const handleLeave = () => {
-        const icon = card.querySelector('.portal-card-icon') as HTMLElement;
-        const badges = card.querySelectorAll('.portal-card-badge') as NodeListOf<HTMLElement>;
-        
-        gsap.to(card, {
-          rotationY: base.rotationY,
-          rotationX: base.rotationX,
-          duration: 0.6, // Daha hızlı
-          ease: 'power2.out',
-          boxShadow: '0px 22px 60px -40px rgba(17, 24, 39, 0.25)',
-          force3D: true,
-        });
-        
-        // İçerikleri de orijinal konumlarına döndür
-        if (icon) {
-          gsap.to(icon, {
-            x: 0,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            force3D: true,
-          });
-        }
-        
-        if (badges.length) {
-          gsap.to(badges, {
-            x: 0,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out',
-            force3D: true,
-          });
-        }
-      };
-
-      card.addEventListener('mousemove', handleMove);
-      card.addEventListener('mouseleave', handleLeave);
-      card.addEventListener('mouseenter', handleMove);
-
-      cardTiltCleanupRef.current.push(() => {
-        card.removeEventListener('mousemove', handleMove);
-        card.removeEventListener('mouseleave', handleLeave);
-        card.removeEventListener('mouseenter', handleMove);
-      });
-    });
+    })();
 
     return () => {
+      mounted = false;
       cardTiltCleanupRef.current.forEach(cleanup => cleanup());
       cardTiltCleanupRef.current = [];
     };
   }, [activePanel, isCoarsePointer]);
 
-  const handleCardHover = (
+  const handleCardHover = async (
     card: 'shop' | 'consultant' | 'insight',
     isHovering: boolean
   ) => {
     // Dokunmatik cihazlarda hover animasyonları kapalı
     if (isCoarsePointer) return;
+
+    const gsap = await getGsap();
 
     let cardRef: HTMLDivElement | null = null;
     let overlayRef: HTMLDivElement | null = null;
@@ -1598,83 +1604,92 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    const ctx = gsap.context(() => {
-      const titleElement = titleRef.current;
-      if (!titleElement) return;
+    let ctx: any = null;
+    (async () => {
+      try {
+        const gsap = await getGsap();
+        ctx = gsap.context(() => {
+          const titleElement = titleRef.current;
+          if (!titleElement) return;
 
-      // Epic giriş animasyonu - sinematik 3D depth
-      gsap.fromTo(
-        titleElement,
-        { 
-          y: 100, 
-          opacity: 0, 
-          scale: 0.8,
-          rotationX: -30,
-          rotationY: -15,
-          z: -300,
-          transformPerspective: 1500,
-          filter: 'blur(15px) brightness(0.4)',
-        },
-        { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1, 
-          rotationX: 0,
-          rotationY: 0,
-          z: 0,
-          filter: 'blur(0px) brightness(1)',
-          duration: 2.2, 
-          ease: 'expo.out',
-          delay: 0.3,
-        }
-      );
+          // Epic giriş animasyonu - sinematik 3D depth
+          gsap.fromTo(
+            titleElement,
+            { 
+              y: 100, 
+              opacity: 0, 
+              scale: 0.8,
+              rotationX: -30,
+              rotationY: -15,
+              z: -300,
+              transformPerspective: 1500,
+              filter: 'blur(15px) brightness(0.4)',
+            },
+            { 
+              y: 0, 
+              opacity: 1, 
+              scale: 1, 
+              rotationX: 0,
+              rotationY: 0,
+              z: 0,
+              filter: 'blur(0px) brightness(1)',
+              duration: 2.2, 
+              ease: 'expo.out',
+              delay: 0.3,
+            }
+          );
 
-      // Hafif subtle parıltı - smooth
-      gsap.to(titleElement, {
-        filter: 'brightness(1.05)',
-        textShadow: '0 4px 20px rgba(240,127,56,0.15), 0 2px 10px rgba(255,255,255,0.2)',
-        duration: 5,
-        ease: 'sine.inOut',
-        yoyo: true,
-        repeat: -1,
-        delay: 3,
-      });
-
-      // Glow backdrop pulse - magical atmosphere
-      const titleParent = titleElement.parentElement;
-      if (titleParent) {
-        const glowElements = titleParent.querySelectorAll('.absolute.inset-0');
-        
-        glowElements.forEach((glow, index) => {
-          gsap.to(glow, {
-            opacity: index === 0 ? 0.8 : 0.7,
-            scale: 1.3 + (index * 0.1),
-            duration: 5 + (index * 0.5),
-            ease: 'sine.inOut',
-            yoyo: true,
-            repeat: -1,
-            delay: 2.5 + (index * 0.3),
-          });
-        });
-
-        // Yıldız tozu container animasyonu
-        const stardust = titleParent.querySelector('.overflow-visible');
-        if (stardust) {
-          gsap.to(stardust, {
-            scale: 1.05,
-            rotation: 2,
-            duration: 10,
+          // Hafif subtle parıltı - smooth
+          gsap.to(titleElement, {
+            filter: 'brightness(1.05)',
+            textShadow: '0 4px 20px rgba(240,127,56,0.15), 0 2px 10px rgba(255,255,255,0.2)',
+            duration: 5,
             ease: 'sine.inOut',
             yoyo: true,
             repeat: -1,
             delay: 3,
           });
-        }
+
+          // Glow backdrop pulse - magical atmosphere
+          const titleParent = titleElement.parentElement;
+          if (titleParent) {
+            const glowElements = titleParent.querySelectorAll('.absolute.inset-0');
+            
+            glowElements.forEach((glow, index) => {
+              gsap.to(glow, {
+                opacity: index === 0 ? 0.8 : 0.7,
+                scale: 1.3 + (index * 0.1),
+                duration: 5 + (index * 0.5),
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: -1,
+                delay: 2.5 + (index * 0.3),
+              });
+            });
+
+            // Yıldız tozu container animasyonu
+            const stardust = titleParent.querySelector('.overflow-visible');
+            if (stardust) {
+              gsap.to(stardust, {
+                scale: 1.05,
+                rotation: 2,
+                duration: 10,
+                ease: 'sine.inOut',
+                yoyo: true,
+                repeat: -1,
+                delay: 3,
+              });
+            }
+          }
+        }, titleRef);
+      } catch (err) {
+        console.warn('Title animation init failed', err);
       }
+    })();
 
-    }, titleRef);
-
-    return () => ctx.revert();
+    return () => {
+      ctx?.revert?.();
+    };
   }, []);
 
   useEffect(() => {
@@ -1682,77 +1697,66 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
       return;
     }
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    let ctx: any = null;
+    (async () => {
+      try {
+        const gsap = await getGsap();
+        ctx = gsap.context(() => {
+          const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      // Alt başlık animasyonu - prestige giriş
-      const subtitle = portalRootRef.current?.querySelector('.text-base.xs\\:text-lg');
-      if (subtitle) {
-        gsap.fromTo(
-          subtitle,
-          {
-            opacity: 0,
-            y: 30,
-            scale: 0.95,
-            filter: 'blur(5px)',
-          },
-          {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            filter: 'blur(0px)',
-            duration: 1.2,
-            ease: 'expo.out',
-            delay: 0.8,
+          // Alt başlık animasyonu - prestige giriş
+          const subtitle = portalRootRef.current?.querySelector('.text-base.xs\\:text-lg');
+          if (subtitle) {
+            gsap.fromTo(
+              subtitle,
+              {
+                opacity: 0,
+                y: 30,
+                scale: 0.95,
+                filter: 'blur(5px)',
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                filter: 'blur(0px)',
+                duration: 1.2,
+                ease: 'expo.out',
+                delay: 0.8,
+              }
+            );
+
+            // Sürekli subtle hareket - kurumsal zarif
+            gsap.to(subtitle, {
+              y: -5,
+              duration: 4.5,
+              ease: 'sine.inOut',
+              yoyo: true,
+              repeat: -1,
+              delay: 2.5,
+            });
+
+            // Letter spacing animasyonu - lüks his
+            gsap.to(subtitle, {
+              letterSpacing: '0.08em',
+              duration: 5,
+              ease: 'sine.inOut',
+              yoyo: true,
+              repeat: -1,
+              delay: 3,
+            });
           }
-        );
 
-        // Sürekli subtle hareket - kurumsal zarif
-        gsap.to(subtitle, {
-          y: -5,
-          duration: 4.5,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1,
-          delay: 2.5,
-        });
-
-        // Letter spacing animasyonu - lüks his
-        gsap.to(subtitle, {
-          letterSpacing: '0.08em',
-          duration: 5,
-          ease: 'sine.inOut',
-          yoyo: true,
-          repeat: -1,
-          delay: 3,
-        });
+          // İkonlar ve badge'ler zaten görünür - ağır animasyon kaldırıldı (mobil performans)
+        }, portalRootRef);
+      } catch (err) {
+        console.warn('Subtitle animation init failed', err);
       }
+    })();
 
-      // Kart ikonları - premium cascade
-      tl.from('.portal-card-icon', {
-        opacity: 0,
-        y: 28,
-        scale: 0.8,
-        rotation: -180,
-        duration: 0.7,
-        stagger: 0.1,
-        delay: 0.25,
-        ease: 'back.out(1.5)',
-      })
-        .from(
-          '.portal-card-badge',
-          {
-            opacity: 0,
-            y: 24,
-            duration: 0.55,
-            ease: 'back.out(1.6)',
-            stagger: { each: 0.06, from: 'start' },
-          },
-          '-=0.35'
-        );
-    }, portalRootRef);
-
-    return () => ctx.revert();
+    return () => {
+      ctx?.revert?.();
+    };
   }, []);
 
   const handleShopSearch = () => {
@@ -2119,11 +2123,11 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                   src={activeBackground}
                   alt="IREMWORLD portal arka plan"
                   fill
-                  priority
+                  priority={!isCoarsePointer}
                   className="object-cover object-center"
                   sizes="100vw"
-                  quality={isCoarsePointer ? 75 : 85} // Mobilde daha düşük kalite
-                  loading="eager"
+                  quality={isCoarsePointer ? 60 : 85} // Mobilde daha düşük kalite
+                  loading={isCoarsePointer ? 'lazy' : 'eager'}
                 />
               </motion.div>
               
@@ -2423,11 +2427,11 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                       <p className="text-gray-600 text-xs xs:text-sm sm:text-base mb-2 xs:mb-2.5 sm:mb-3 md:mb-6 font-light leading-[1.7] md:flex-grow">
                         {shopModeMeta[shopMode].description}
                       </p>
-                      <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-1.5 xs:mb-2 sm:mb-2 md:mb-6">
+                      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-1.5 sm:gap-2 mb-1.5 xs:mb-2 sm:mb-2 md:mb-6">
                         {shopCardTags[shopMode].map(tag => (
                           <span
                             key={tag}
-                            className="portal-card-badge px-1.5 xs:px-2 sm:px-3 py-0.5 sm:py-1 bg-[#fff0e5] text-[#f07f38] rounded-full text-[0.6rem] xs:text-[0.65rem] sm:text-xs font-medium whitespace-nowrap"
+                            className="portal-card-badge px-1.5 xs:px-2 sm:px-3 py-0.5 sm:py-1 bg-[#fff0e5] text-[#f07f38] rounded-full text-[0.6rem] xs:text-[0.65rem] sm:text-xs font-medium whitespace-nowrap text-center"
                           >
                             {tag}
                           </span>
@@ -2629,7 +2633,7 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                   data-anim="shop-country"
                 >
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">Odak Bölge</label>
-                  <CountrySelector selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
+                  <CountrySelector options={formattedCountries} selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
@@ -2861,7 +2865,7 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                   className="mb-4 xs:mb-5 sm:mb-6 relative z-40"
                   data-anim="insight-selector">
                   <label className="block text-xs xs:text-sm font-medium text-gray-700 mb-2 xs:mb-2.5 sm:mb-3">Ülke Seçin</label>
-                  <CountrySelector selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
+                  <CountrySelector options={formattedCountries} selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
                 </motion.div>
 
                 <div className="flex flex-col md:flex-row gap-4">
@@ -3203,7 +3207,7 @@ export default function PortalLanding({ onEnter }: { onEnter: () => void }) {
                   data-anim="consultant-country"
                 >
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2 sm:mb-3">Hizmet Bölgesi</label>
-                  <CountrySelector selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
+                  <CountrySelector options={formattedCountries} selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
