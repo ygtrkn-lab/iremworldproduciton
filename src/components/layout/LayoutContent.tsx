@@ -24,7 +24,7 @@ export default function LayoutContent({
   return (
     <SearchProvider>
       <ModernNavbar />
-      <main className={`flex-grow ${!isHomePage ? 'pt-24' : ''}`}>
+      <main className={`flex-grow ${!isHomePage ? 'pt-28' : ''}`}>
         {children}
       </main>
       <Footer />
