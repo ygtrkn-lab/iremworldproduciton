@@ -158,9 +158,10 @@ export default function ModernNavbar() {
   if (!isMounted || pathname === "/") return null;
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out motion-reduce:transition-none ${isHidden ? '-translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}
-    >
+    <>
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out motion-reduce:transition-none ${isHidden ? '-translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}
+      >
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4 pb-4">
         <div className="relative mt-3">
           <div className={`relative flex items-center gap-4 sm:gap-6 rounded-[32px] border border-white/30 bg-white/80 px-4 sm:px-6 shadow-[0_20px_60px_rgba(15,23,42,0.18)] backdrop-blur-2xl transition-all duration-500 motion-reduce:transition-none ${isScrolled ? 'py-2.5' : 'py-4'}`}>
@@ -422,22 +423,23 @@ export default function ModernNavbar() {
           </div>
         </div>
       )}
+      </header>
 
-      {/* Search Modal - Modern Minimalist Design */}
-      {isSearchOpen && (
-        <>
-          {/* Backdrop Overlay */}
+    {/* Search Modal - Modern Minimalist Design */}
+    {isSearchOpen && (
+      <>
+        {/* Backdrop Overlay */}
+        <div 
+          className="fixed inset-0 z-40 bg-gradient-to-b from-white/95 via-white/90 to-white/80 backdrop-blur-xl animate-in fade-in duration-300"
+          onClick={() => setIsSearchOpen(false)}
+        />
+        
+        {/* Search Content */}
+        <div className="fixed inset-x-0 top-0 z-50 pt-32">
           <div 
-            className="fixed inset-0 z-40 bg-gradient-to-b from-white/95 via-white/90 to-white/80 backdrop-blur-xl animate-in fade-in duration-300"
-            onClick={() => setIsSearchOpen(false)}
-          />
-          
-          {/* Search Content */}
-          <div className="fixed inset-x-0 top-0 z-50 pt-32">
-            <div 
-              className="w-full max-w-5xl mx-auto px-4 animate-in slide-in-from-top-4 duration-300"
-              onClick={(e) => e.stopPropagation()}
-            >
+            className="w-full max-w-5xl mx-auto px-4 animate-in slide-in-from-top-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Search Input */}
             <form onSubmit={handleSearch} className="mb-8">
               <div className="relative group">
@@ -573,8 +575,9 @@ export default function ModernNavbar() {
               </div>
             </div>
           </div>
-        </>
-      )}
-    </header>
+        </div>
+      </>
+    )}
+  </>
   );
 }
